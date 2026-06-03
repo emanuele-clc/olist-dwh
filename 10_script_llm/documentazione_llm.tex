@@ -1,0 +1,577 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm]{geometry}
+\usepackage{fancyhdr}
+\setlength{\headheight}{14.5pt}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Università della Calabria}
+\rhead{\small Data Warehouse and Visualization}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{0pt}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  rulecolor=\color{gray!40},
+  keywordstyle=\color{blue!70}\bfseries,
+  commentstyle=\color{green!50!black},
+  stringstyle=\color{red!60!black},
+  showstringspaces=false,
+  language=Python,
+  xleftmargin=6pt,
+  xrightmargin=6pt,
+  aboveskip=8pt,
+  belowskip=8pt
+}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\begin{document}
+\thispagestyle{empty}
+
+\begin{titlepage}
+  \centering
+  \vspace*{3cm}
+  {\LARGE\bfseries Integrazione LLM nel Data Warehouse Olist\\[0.5em]
+  Documentazione Tecnica degli Script \texttt{10\_script\_llm}}\\[1.5cm]
+  {\large Emanuele Colecchia — Matricola 276527}\\[0.5cm]
+  {\large Corso: Data Warehouse and Visualization}\\[0.5cm]
+  {\large A.A. 2025/2026 — Università della Calabria}\\[2cm]
+  {\normalsize\textit{Dataset: Brazilian E-Commerce Public Dataset (Olist, Kaggle)}}\\
+  \vfill
+  {\small Generato il \today}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Introduzione Teorica: LLM come Livello di Supporto}
+% ═══════════════════════════════════════════════════════════════════════════
+
+\subsection{Ruolo degli LLM nel processo DQ}
+
+I Large Language Models (LLM) vengono utilizzati in questi script come
+\textbf{livello di supporto} aggiuntivo rispetto alla pipeline classica di
+Data Quality Assessment (DQA). Il principio fondamentale è che
+\textit{gli LLM non sostituiscono la pipeline quantitativa}: gli scorecard DQ
+rimangono la fonte autoritativa di verità, mentre gli LLM arricchiscono il
+processo con:
+
+\begin{itemize}
+  \item \textbf{Interpretazione in linguaggio naturale} degli scorecard tecnici,
+        traducendoli in report leggibili da stakeholder non tecnici.
+  \item \textbf{Generazione di regole di validità domain-aware}: dato il contesto
+        reale del dominio (e-commerce brasiliano, categorie prodotti, stati geografici),
+        l'LLM suggerisce lambda Python specifiche per il dataset.
+  \item \textbf{Classificazione della missingness}: supporto alla distinzione tra
+        MCAR / MAR / MNAR con ragionamento domain-aware.
+  \item \textbf{Pianificazione strutturata del cleaning}: generazione di piani JSON
+        con priorità e metodi pandas specifici.
+  \item \textbf{Narrazione degli audit log}: trasformazione di log tecnici in
+        report comprensibili per il management.
+\end{itemize}
+
+\subsection{Provider LLM supportati}
+
+Tutti e tre gli script supportano i seguenti provider, configurabili tramite
+la variabile \texttt{LLM\_PROVIDER}:
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{llll}
+    \toprule
+    \textbf{Provider} & \textbf{Modello} & \textbf{Requisito} & \textbf{Note} \\
+    \midrule
+    \texttt{openai}      & \texttt{gpt-4o-mini}              & API key OpenAI    & Cloud \\
+    \texttt{anthropic}   & \texttt{claude-haiku-4-5-20251001} & API key Anthropic & Cloud \\
+    \texttt{ollama}      & \texttt{llama3.2:3b}              & Server locale     & Default \\
+    \texttt{huggingface} & \texttt{Qwen/Qwen2.5-1.5B-Instruct} & Token HF (opt.) & Cloud \\
+    \bottomrule
+  \end{tabular}
+  \caption{Provider LLM supportati dalla pipeline}
+\end{table}
+
+\subsection{Architettura dei path}
+
+Gli script sono stati adattati dalla versione originale (Google Colab +
+Google Drive) a un'architettura \textbf{portable e locale}. I path vengono
+calcolati automaticamente a partire dalla posizione dello script:
+
+\begin{lstlisting}[language=Python]
+_HERE   = os.path.dirname(os.path.abspath('__file__'))  # consegna/10_script_llm/
+_ROOT   = os.path.dirname(_HERE)                         # consegna/
+RAW_PATH     = os.path.join(_ROOT, '1_raw_data')    + os.sep
+CLEANED_PATH = os.path.join(_ROOT, '3_cleaned_data') + os.sep
+OUTPUT_PATH  = os.path.join(_ROOT, '10_script_llm', 'outputs') + os.sep
+\end{lstlisting}
+
+Questo garantisce che gli script funzionino su qualsiasi macchina senza
+modifiche manuali ai path.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Modifiche Apportate — Adattamento al Dataset Olist}
+% ═══════════════════════════════════════════════════════════════════════════
+
+\subsection{Problemi nella versione originale}
+
+La versione originale dei notebook presentava i seguenti problemi che
+impedivano l'esecuzione:
+
+\begin{enumerate}
+  \item \textbf{Path Google Colab non portabili:}
+        \texttt{BASE\_PATH = '/content/drive/Shareddrives/...'} e
+        \texttt{drive.mount('/content/drive')} — inutilizzabili al di fuori di Colab.
+  \item \textbf{Dataset generici non correlati a Olist:}
+        \begin{itemize}
+          \item L1: \texttt{orders\_table.csv} (dati sintetici generici)
+          \item L2: \texttt{patient\_readings.csv} (dati medici, nessuna relazione con il progetto)
+          \item L3: \texttt{L3\_products\_dirty.csv} (dati retail generici)
+        \end{itemize}
+  \item \textbf{Prompt LLM con contesto sbagliato:} riferimenti a dataset medici,
+        colonne inesistenti (\texttt{admission\_date}, \texttt{category}, \texttt{brand}).
+  \item \textbf{Celle di installazione sistema inutili:} \texttt{!apt-get install zstd},
+        \texttt{!curl -fsSL https://ollama.com/install.sh | sh} — specifiche di Colab.
+  \item \textbf{Codice duplicato:} funzione \texttt{call\_llm\_ollama} definita più volte,
+        poi ridefinita come \texttt{call\_llm} — confusione e ridondanza.
+\end{enumerate}
+
+\subsection{Interventi effettuati}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{p{4cm}p{5cm}p{5cm}}
+    \toprule
+    \textbf{Problema} & \textbf{Versione originale} & \textbf{Versione adattata} \\
+    \midrule
+    Path & \texttt{/content/drive/Shareddrives/...} & Path relativi con \texttt{os.path} \\
+    Dataset L1 & \texttt{orders\_table.csv} (sintetico) & \texttt{olist\_orders\_dataset.csv} \\
+    Dataset L2 & \texttt{patient\_readings.csv} (medico) & \texttt{olist\_orders\_dataset.csv} + \texttt{olist\_order\_items\_dataset.csv} \\
+    Dataset L3 & \texttt{L3\_products\_dirty.csv} (generico) & \texttt{olist\_products\_dataset.csv} + \texttt{dim\_products.csv} \\
+    Scorecard & File generici & \texttt{4\_dq\_scorecards/dq\_scorecard\_*.csv} reali \\
+    Colab setup & \texttt{drive.mount()}, \texttt{!apt-get} & Rimossi \\
+    Prompt LLM & Contesto generico/medico & Contesto Olist (BRL, 2016-2018, BR) \\
+    Funzione LLM & Duplicata e incompleta & Unificata in \texttt{call\_llm()} completa \\
+    \bottomrule
+  \end{tabular}
+  \caption{Modifiche apportate per adattare i notebook al dataset Olist}
+\end{table}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{L1 — LLM-Supported Data Quality Assessment}
+% ═══════════════════════════════════════════════════════════════════════════
+
+\subsection{Descrizione}
+
+Lo script L1 utilizza gli LLM per analizzare gli scorecard DQ già prodotti
+dalla pipeline classica (\texttt{data\_quality\_assessment\_LOCAL.ipynb}) e
+produrre tre output in linguaggio naturale:
+
+\begin{enumerate}
+  \item \textbf{Audit Report}: interpretazione professionale dello scorecard per stakeholder.
+  \item \textbf{Regole di validità}: generazione di lambda Python domain-aware.
+  \item \textbf{Sommario stakeholder}: spiegazione semplificata per management non tecnico.
+\end{enumerate}
+
+\subsection{Input}
+
+\begin{itemize}
+  \item \texttt{1\_raw\_data/olist\_orders\_dataset.csv} (99.441 righe)
+  \item \texttt{1\_raw\_data/olist\_customers\_dataset.csv} (99.441 righe)
+  \item \texttt{1\_raw\_data/olist\_order\_items\_dataset.csv} (112.650 righe)
+  \item \texttt{1\_raw\_data/olist\_products\_dataset.csv} (32.951 righe)
+  \item \texttt{1\_raw\_data/olist\_sellers\_dataset.csv} (3.095 righe)
+  \item \texttt{1\_raw\_data/olist\_order\_payments\_dataset.csv} (103.886 righe)
+  \item \texttt{1\_raw\_data/olist\_order\_reviews\_dataset.csv} (99.224 righe)
+  \item \texttt{1\_raw\_data/olist\_geolocation\_dataset.csv} (1.000.163 righe)
+  \item \texttt{4\_dq\_scorecards/dq\_scorecard\_*.csv} (scorecard per ogni tabella)
+\end{itemize}
+
+\subsection{Output}
+
+\begin{itemize}
+  \item \texttt{10\_script\_llm/outputs/dq\_audit\_\{table\}.md} — report audit per ogni tabella
+  \item \texttt{10\_script\_llm/outputs/dq\_generated\_rules\_\{table\}.md} — regole validità
+  \item \texttt{10\_script\_llm/outputs/stakeholder\_summaries.md} — sommari stakeholder
+\end{itemize}
+
+\subsection{Prompt LLM — Use Case 1: Audit Report}
+
+\begin{lstlisting}[language=Python, caption=System prompt per audit report]
+SYSTEM_AUDIT = """You are a senior Data Quality Analyst specializing in Data Warehouse
+systems for large-scale e-commerce platforms. The dataset is from Olist, the largest
+Brazilian online marketplace. Your task is to interpret a structured DQ scorecard and
+produce a clear, actionable audit report for a business stakeholder audience.
+Be specific about root causes and prioritize recommendations by business impact.
+Write in Italian."""
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption=User prompt per audit report (template)]
+PROMPT_AUDIT = f"""Di seguito e' riportato lo scorecard DQ per la tabella '{table_name}'
+del Data Warehouse Olist (e-commerce brasiliano, ~100.000 ordini reali, 2016-2018).
+Analizza e produci un report strutturato con:
+1. Riepilogo Esecutivo (2-3 frasi)
+2. Problemi Critici (richiedono intervento immediato)
+3. Problemi Moderati (da risolvere prima del prossimo ciclo ETL)
+4. Priorita' di Cleaning Raccomandata (lista ordinata per impatto)
+5. Rischio Stimato per Analytics Downstream
+
+SCORECARD:
+{scorecard_json}
+"""
+\end{lstlisting}
+
+\subsection{Prompt LLM — Use Case 2: Generazione Regole di Validità}
+
+\begin{lstlisting}[language=Python, caption=System prompt per generazione regole]
+SYSTEM_RULES = """You are a Data Engineer expert in Data Quality for e-commerce DW systems.
+Given column metadata and sample values from the Olist Brazilian e-commerce platform,
+generate Python pandas validation rule functions (lambdas) using only standard
+pandas/numpy operations.
+Each rule must be a lambda that takes a Series and returns a boolean Series
+(True = valid).
+Return ONLY valid Python code in a dict named 'validity_rules'.
+Use domain knowledge: Brazilian state codes (2 uppercase letters), UUID-format IDs,
+positive prices, order_status in a defined set, etc."""
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption=Esempio output atteso dalle regole generate]
+validity_rules = {
+    'order_id':      lambda s: s.str.len() == 32,
+    'customer_id':   lambda s: s.str.len() == 32,
+    'order_status':  lambda s: s.isin(['delivered','shipped','processing',
+                                        'canceled','unavailable','invoiced',
+                                        'created','approved']),
+    'order_purchase_timestamp': lambda s: pd.to_datetime(s, errors='coerce').notna(),
+}
+\end{lstlisting}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{L2 — LLM-Supported Missing Values \& Outlier Analysis}
+% ═══════════════════════════════════════════════════════════════════════════
+
+\subsection{Descrizione}
+
+Lo script L2 analizza i pattern di valori mancanti e gli outlier nei dataset
+Olist, con supporto LLM per:
+
+\begin{enumerate}
+  \item \textbf{Interpretazione MCAR/MAR/MNAR}: classificazione domain-aware
+        della tipologia di missingness.
+  \item \textbf{Strategia di imputazione}: generazione di codice Python per
+        la gestione ottimale dei NULL.
+  \item \textbf{Narrativa outlier}: spiegazione business degli outlier rilevati.
+\end{enumerate}
+
+\subsection{Dataset analizzati}
+
+\begin{itemize}
+  \item \texttt{olist\_orders\_dataset.csv}: missingness su \texttt{order\_approved\_at}
+        (160 NULL), \texttt{order\_delivered\_carrier\_date} (1.783 NULL),
+        \texttt{order\_delivered\_customer\_date} (2.965 NULL).
+  \item \texttt{olist\_order\_items\_dataset.csv}: outlier su \texttt{price}
+        (max 6.735 BRL) e \texttt{freight\_value}.
+  \item \texttt{olist\_products\_dataset.csv}: outlier su misure fisiche
+        (es. peso 40.000g), missingness su colonne dimensionali.
+  \item \texttt{olist\_customers\_dataset.csv}: analisi completezza e unicità.
+  \item \texttt{olist\_sellers\_dataset.csv}: analisi distribuzione geografica e outlier.
+  \item \texttt{olist\_order\_payments\_dataset.csv}: outlier su \texttt{payment\_value}
+        e \texttt{payment\_installments}.
+  \item \texttt{olist\_order\_reviews\_dataset.csv}: missingness su
+        \texttt{review\_comment\_title} e \texttt{review\_comment\_message}.
+  \item \texttt{olist\_geolocation\_dataset.csv}: outlier su coordinate lat/lng.
+\end{itemize}
+
+\subsection{Classificazione Missingness}
+
+La classe \texttt{MissingnessAnalyzer} applica un'euristica basata su:
+
+\begin{itemize}
+  \item \textbf{MCAR}: percentuale di missingness $< 0.5\%$ — probabile casualità.
+  \item \textbf{MAR}: missingness correlata a variabili categoriche osservabili
+        (variazione $> 5\%$ del tasso di missingness tra categorie).
+  \item \textbf{MNAR}: nessuna correlazione rilevata — possibile null semantico
+        (es. ordine non ancora consegnato).
+\end{itemize}
+
+Per il dataset Olist, i tre campi mancanti sono classificati come \textbf{MNAR
+(null semantici)}: la mancanza di \texttt{order\_delivered\_customer\_date} non
+è un errore — significa semplicemente che l'ordine non è ancora stato consegnato.
+
+\subsection{Prompt LLM — Interpretazione Missingness}
+
+\begin{lstlisting}[language=Python, caption=System prompt per interpretazione missingness]
+SYSTEM_MISSING = """You are a senior Data Engineer specializing in e-commerce
+Data Warehouses. You are analyzing the Olist dataset, a Brazilian e-commerce
+platform with ~100,000 orders from 2016-2018.
+Your role is to interpret missing value patterns, classify them as MCAR/MAR/MNAR
+with domain knowledge, and suggest appropriate imputation or handling strategies.
+Write in Italian. Be specific and use domain context (e.g., orders without
+delivery dates may simply not have been delivered yet -- semantic nulls,
+not data errors)."""
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption=User prompt per interpretazione missingness (estratto)]
+PROMPT_MISSING = f"""Tabella: olist_orders (99.441 ordini e-commerce brasiliani, 2016-2018)
+Colonne con valori mancanti:
+{miss_json}
+
+Nota di dominio:
+- order_approved_at: data di approvazione pagamento. NULL se il pagamento
+  non e' stato ancora approvato.
+- order_delivered_carrier_date: data di consegna al corriere. NULL se
+  l'ordine e' ancora in lavorazione.
+- order_delivered_customer_date: data di consegna al cliente. NULL se
+  non ancora consegnato.
+
+Per ogni colonna:
+1. Classifica il tipo di missingness (MCAR/MAR/MNAR) con motivazione
+2. Spiega l'impatto sul DW se i NULL non vengono gestiti correttamente
+3. Raccomanda la strategia ottimale (flag binario, esclusione, imputazione)
+"""
+\end{lstlisting}
+
+\subsection{Outlier Detection — Metodi}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lll}
+    \toprule
+    \textbf{Metodo} & \textbf{Formula} & \textbf{Uso} \\
+    \midrule
+    IQR ($k=1.5$) & $[Q_1 - 1.5 \cdot IQR,\; Q_3 + 1.5 \cdot IQR]$ & Default \\
+    Z-score ($\sigma=3$) & $|z| > 3$ dove $z = (x - \mu)/\sigma$ & Distribuz.\ normali \\
+    \bottomrule
+  \end{tabular}
+  \caption{Metodi di outlier detection implementati in OutlierDetector}
+\end{table}
+
+\subsection{Prompt LLM — Narrativa Outlier}
+
+\begin{lstlisting}[language=Python, caption=System prompt per narrativa outlier]
+SYSTEM_OUTLIER = """You are a senior Data Analyst for Olist, a Brazilian
+e-commerce marketplace. You interpret outlier detection results and provide
+business-context narrative explanations. For each detected outlier:
+- Explain potential real-world causes (luxury products, errors, fraud, etc.)
+- Assess business impact (distorted averages, wrong recommendations, etc.)
+- Recommend the appropriate handling strategy
+Write in Italian."""
+\end{lstlisting}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{L3 — LLM-Supported Data Cleaning}
+% ═══════════════════════════════════════════════════════════════════════════
+
+\subsection{Descrizione}
+
+Lo script L3 utilizza gli LLM per supportare il processo di cleaning di
+tutte le 8 tabelle Olist, con due use case principali applicati sistematicamente:
+
+\begin{enumerate}
+  \item \textbf{Piano di cleaning strutturato}: l'LLM genera per ogni tabella
+        un piano JSON con step numerati, metodo pandas da applicare, priorità
+        (high/medium/low) e impatto sul business se lo step non viene eseguito.
+  \item \textbf{Narrativa audit}: dato il confronto statistico prima/dopo
+        cleaning, l'LLM produce una narrativa professionale delle trasformazioni
+        effettuate, quantificando il miglioramento della qualità.
+\end{enumerate}
+
+Per la tabella \texttt{products}, è presente anche un terzo use case specifico:
+mapping delle categorie dal portoghese all'inglese, con verifica del mapping
+ufficiale Olist e integrazione LLM per le categorie non coperte.
+
+\subsection{Input/Output}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lll}
+    \toprule
+    \textbf{File} & \textbf{Tipo} & \textbf{Contenuto} \\
+    \midrule
+    \texttt{olist\_products\_dataset.csv} & Input raw & 32.951 prodotti sporchi \\
+    \texttt{product\_category\_name\_translation.csv} & Reference & 71 mapping PT$\to$EN \\
+    \texttt{dim\_products.csv} & Input cleaned & Versione pulita post-pipeline \\
+    \texttt{audit\_log.csv} & Input & Log trasformazioni \\
+    \texttt{L3\_category\_mapping.json} & Output & Mapping finale PT$\to$EN \\
+    \texttt{L3\_cleaning\_plan.json} & Output & Piano cleaning strutturato \\
+    \texttt{L3\_audit\_narrative.md} & Output & Narrativa audit in italiano \\
+    \bottomrule
+  \end{tabular}
+  \caption{File di input e output di L3}
+\end{table}
+
+\subsection{Prompt LLM — Use Case 1: Mapping Categorie}
+
+\begin{lstlisting}[language=Python, caption=System prompt per mapping categorie PT→EN]
+SYSTEM_ENUM = """You are a Data Engineer building a product taxonomy for a
+Brazilian e-commerce DW. The platform is Olist, an online marketplace
+aggregating multiple sellers.
+You receive Portuguese product category names and must map them to standardized
+English equivalents.
+Rules:
+- Use standard e-commerce taxonomy (Electronics, Home & Garden, Sports,
+  Beauty & Health, etc.)
+- Return ONLY a Python dict named 'category_mapping' with 'pt_name':'en_name'
+- If a category is 'nan' or invalid, map it to 'unknown'
+- Be consistent: same concept -> same English label"""
+\end{lstlisting}
+
+Il mapping ufficiale contiene 71 coppie PT$\to$EN. Il sistema usa
+\texttt{product\_category\_name\_translation.csv} come ground truth e invoca
+l'LLM solo per categorie eventualmente non mappate nel file ufficiale.
+
+\subsection{Prompt LLM — Use Case 2: Piano di Cleaning}
+
+\begin{lstlisting}[language=Python, caption=System prompt per piano cleaning]
+SYSTEM_PLAN = """You are a senior Data Engineer building ETL cleaning pipelines
+for a Brazilian e-commerce Data Warehouse (Olist). You produce structured,
+actionable cleaning plans in JSON format that can be directly translated into
+Python/pandas code. Prioritize by business impact. Be specific about the
+pandas method to use. Return ONLY valid JSON."""
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption=Struttura JSON attesa dal piano cleaning]
+{
+  "table": "olist_products_dataset",
+  "steps": [
+    {
+      "step_id": 1,
+      "name": "fill_missing_category",
+      "description": "Imputa le categorie mancanti con 'unknown'",
+      "columns": ["product_category_name"],
+      "pandas_method": "fillna('unknown')",
+      "priority": "high",
+      "business_impact": "Categorie NULL rendono impossibile l'analisi fatturato per categoria"
+    },
+    {
+      "step_id": 2,
+      "name": "add_english_category",
+      "description": "Aggiunge colonna product_category_name_english tramite JOIN",
+      "columns": ["product_category_name"],
+      "pandas_method": "map(cat_translation_dict)",
+      "priority": "high",
+      "business_impact": "Dashboard Tableau richiede categorie in inglese"
+    }
+  ]
+}
+\end{lstlisting}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Istruzioni per l'Esecuzione}
+% ═══════════════════════════════════════════════════════════════════════════
+
+\subsection{Prerequisiti}
+
+\begin{lstlisting}[language=bash, caption=Installazione dipendenze Python]
+pip install openai anthropic scikit-learn scipy requests --quiet
+\end{lstlisting}
+
+Per usare \textbf{Ollama} (provider consigliato, locale, gratuito):
+
+\begin{lstlisting}[language=bash, caption=Installazione e avvio Ollama]
+# 1. Installa Ollama (Mac/Linux)
+curl -fsSL https://ollama.com/install.sh | sh
+
+# 2. Scarica il modello
+ollama pull llama3.2:3b
+
+# 3. Avvia il server (si avvia automaticamente alle richieste API)
+ollama serve
+\end{lstlisting}
+
+\subsection{Ordine di esecuzione}
+
+\begin{enumerate}
+  \item \textbf{L1}: apri \texttt{L1\_LLM\_data\_quality\_assessment.ipynb} e
+        esegui tutte le celle. Richiede che gli scorecard DQ siano già in
+        \texttt{4\_dq\_scorecards/} (generati da \texttt{data\_quality\_assessment\_LOCAL.ipynb}).
+  \item \textbf{L2}: apri \texttt{L2\_Colab2\_LLM\_Missing\_Outliers.ipynb} e
+        esegui tutte le celle. Legge direttamente i CSV raw da \texttt{1\_raw\_data/}.
+  \item \textbf{L3}: apri \texttt{L3\_Colab2\_LLM\_Cleaning.ipynb} e
+        esegui tutte le celle. Richiede sia i CSV raw che i cleaned da
+        \texttt{3\_cleaned\_data/}.
+\end{enumerate}
+
+\subsection{Output generati}
+
+Tutti gli output vengono salvati in \texttt{10\_script\_llm/outputs/}:
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lll}
+    \toprule
+    \textbf{Script} & \textbf{File} & \textbf{Contenuto} \\
+    \midrule
+    L1 & \texttt{dq\_audit\_\{table\}.md} & Audit report per ogni tabella \\
+    L1 & \texttt{dq\_generated\_rules\_\{table\}.md} & Regole di validità Python \\
+    L1 & \texttt{stakeholder\_summaries.md} & Sommari per management \\
+    L2 & \texttt{L2\_missing\_interpretation.md} & Interpretazione MCAR/MAR/MNAR \\
+    L2 & \texttt{L2\_outlier\_narrative.md} & Narrativa outlier \\
+    L2 & \texttt{L2\_imputation\_code.py} & Codice imputazione generato \\
+    L3 & \texttt{L3\_category\_mapping.json} & Mapping PT$\to$EN finale \\
+    L3 & \texttt{L3\_cleaning\_plan.json} & Piano cleaning strutturato \\
+    L3 & \texttt{L3\_audit\_narrative.md} & Narrativa audit prodotti \\
+    \bottomrule
+  \end{tabular}
+  \caption{Output generati dalla pipeline LLM}
+\end{table}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Considerazioni Metodologiche}
+% ═══════════════════════════════════════════════════════════════════════════
+
+\subsection{Limiti degli LLM in questo contesto}
+
+\begin{itemize}
+  \item \textbf{Non determinismo}: la stessa chiamata LLM può produrre output
+        diversi tra esecuzioni successive. Per questo il codice generato viene
+        sempre validato prima dell'esecuzione (\texttt{exec()} in sandbox).
+  \item \textbf{Allucinazioni}: l'LLM può generare regole di validità plausibili
+        ma errate (es.\ formato errato per \texttt{order\_id}). Le regole generate
+        devono essere revisionate manualmente prima di essere usate in produzione.
+  \item \textbf{Dipendenza dal modello}: modelli più piccoli (l  \item \textbf{Dipendenza dal modello}: modelli più piccoli (llama3.2:3b) producono
+        output meno precisi rispetto a GPT-4o o Claude Opus. Per produzione è
+        consigliato usare un modello cloud.
+\end{itemize}
+
+\subsection{Sicurezza del codice generato}
+
+Tutti i blocchi di codice Python generati dall'LLM vengono eseguiti in un
+ambiente sandbox isolato:
+
+\begin{lstlisting}[language=Python, caption=Esecuzione sicura del codice LLM]
+local_env = {}   # ambiente isolato -- non accede a variabili globali
+try:
+    exec(code_str, {}, local_env)
+    result = local_env.get('category_mapping', {})
+except Exception as e:
+    print(f'Parsing LLM code fallito: {e}')
+    result = {}
+\end{lstlisting}
+
+\subsection{Conclusioni}
+
+Gli script L1, L2 e L3 dimostrano un approccio ibrido alla Data Quality:
+la pipeline quantitativa classica fornisce numeri oggettivi e riproducibili,
+mentre gli LLM aggiungono interpretazione domain-aware, generazione di codice
+e comunicazione verso stakeholder non tecnici. L'adattamento al dataset Olist
+rende l'intera pipeline eseguibile localmente senza dipendenze da Google Colab
+o da API chiave per il provider Ollama.
+
+\end{document}
