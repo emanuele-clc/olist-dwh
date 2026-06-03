@@ -1,0 +1,6 @@
+Table,Dimension,Score,Issues,Status,Details
+olist_order_items,Completeness,1.0,0,🟢,Missing per col: {}
+olist_order_items,Uniqueness,1.0,0,🟢,"Righe duplicate su ['order_id', 'order_item_id']: 0"
+olist_order_items,Validity,1.0,0,🟢,price: 0 invalid | freight_value: 0 invalid | order_item_id: 0 invalid | shipping_limit_date: 0 invalid
+olist_order_items,Consistency,1.0,0,🟢,0 righe violano almeno una regola di consistenza
+olist_order_items,Precision,0.9825,1966,🟢,"Variance ±3.0σ: mean=120.65, std=183.63, range=[-430.25, 671.56]"

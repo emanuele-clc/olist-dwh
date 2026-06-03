@@ -1,0 +1,6 @@
+Table,Dimension,Score,Issues,Status,Details
+olist_products,Completeness,0.9917,2448,🟢,"Missing per col: {'product_category_name': 610, 'product_name_lenght': 610, 'product_description_lenght': 610, 'product_photos_qty': 610, 'product_weight_g': 2, 'product_length_cm': 2, 'product_height_cm': 2, 'product_width_cm': 2}"
+olist_products,Uniqueness,1.0,0,🟢,Righe duplicate su ['product_id']: 0
+olist_products,Validity,0.9999,4,🟢,product_weight_g: 4 invalid | product_length_cm: 0 invalid | product_height_cm: 0 invalid | product_width_cm: 0 invalid | product_photos_qty: 0 invalid | product_name_lenght: 0 invalid | product_description_lenght: 0 invalid
+olist_products,Consistency,0.9999,2,🟢,2 righe violano almeno una regola di consistenza
+olist_products,Precision,0.9708,961,🟢,"Variance ±3.0σ: mean=2276.47, std=4282.04, range=[-10569.64, 15122.59]"

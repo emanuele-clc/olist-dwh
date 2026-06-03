@@ -1,0 +1,52 @@
+{
+  "table": "orders",
+  "steps": [
+    {
+      "step_id": 1,
+      "name": "Elimina righe con dati mancanti",
+      "description": "Rimuovere le righe con valori null per i colonni 'order_approved_at', 'order_delivered_carrier_date' e 'order_delivered_customer_date'.",
+      "columns": [
+        "order_approved_at",
+        "order_delivered_carrier_date",
+        "order_delivered_customer_date"
+      ],
+      "pandas_method": "dropna",
+      "priority": "high",
+      "business_impact": "Rimozione dati non pertinenti per ottimizzare le query"
+    },
+    {
+      "step_id": 2,
+      "name": "Converte tipi di dati",
+      "description": "Convertire i valori dei colonni 'order_purchase_timestamp', 'order_approved_at', 'order_delivered_carrier_date' e 'order_delivered_customer_date' da stringa a datetime.",
+      "columns": [
+        "order_purchase_timestamp",
+        "order_approved_at",
+        "order_delivered_carrier_date",
+        "order_delivered_customer_date"
+      ],
+      "pandas_method": "to_datetime",
+      "priority": "high",
+      "business_impact": "Conversione dei tipi di dati per semplificare le date"
+    },
+    {
+      "step_id": 3,
+      "name": "Elimina righe con valori duplicati",
+      "description": "Rimuovere le righe duplicate.",
+      "columns": [],
+      "pandas_method": "drop_duplicates",
+      "priority": "medium",
+      "business_impact": "Rimozione dati non pertinenti per ridurre la dimensione del set di dati"
+    },
+    {
+      "step_id": 4,
+      "name": "Ordina le righe per ordine di acquisizione",
+      "description": "Organizzare le righe in base all'ordine di acquisto.",
+      "columns": [
+        "order_purchase_timestamp"
+      ],
+      "pandas_method": "sort_values",
+      "priority": "low",
+      "business_impact": "Ordinamento delle righe per facilità di consultazione"
+    }
+  ]
+}

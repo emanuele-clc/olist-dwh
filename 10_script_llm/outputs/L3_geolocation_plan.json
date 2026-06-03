@@ -1,0 +1,35 @@
+{
+  "table": "geolocation",
+  "steps": [
+    {
+      "step_id": 1,
+      "name": "Eliminazione duplicati",
+      "description": "Rimuovere le righe duplicati per il codice prefisso della posizione geografica",
+      "columns": [],
+      "pandas_method": "drop_duplicates(subset=['geolocation_zip_code_prefix'], keep='first', inplace=True)",
+      "priority": "high",
+      "business_impact": "Eliminare le duplicate può influenzare la precisione dei risultati"
+    },
+    {
+      "step_id": 2,
+      "name": "Crittografia zip code prefix",
+      "description": "Criptografare il codice prefisso della posizione geografica per proteggere i dati sensibili",
+      "columns": [],
+      "pandas_method": "geopandas.utils.crispify_column('geolocation_zip_code_prefix')",
+      "priority": "medium",
+      "business_impact": "La crittografia è importante per proteggere i dati sensibili"
+    },
+    {
+      "step_id": 3,
+      "name": "Normale scale delle coordinate",
+      "description": "Normare la scala delle coordinate latitudinari e longitudinarie",
+      "columns": [],
+      "pandas_method": [
+        "geopandas.utils.scale_column('geolocation_lat', 'min=-36.61, max=45.07')",
+        "geopandas.utils.scale_column('geolocation_lng', 'min=-101.47, max=121.11')"
+      ],
+      "priority": "low",
+      "business_impact": "La normalizzazione delle coordinate non influenza direttamente i risultati"
+    }
+  ]
+}

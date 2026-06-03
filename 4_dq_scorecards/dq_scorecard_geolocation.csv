@@ -1,0 +1,5 @@
+Table,Dimension,Score,Issues,Status,Details
+olist_geolocation,Completeness,1.0,0,🟢,Missing per col: {}
+olist_geolocation,Uniqueness,0.001,999120,🔴,Righe duplicate su ['geolocation_zip_code_prefix']: 999120
+olist_geolocation,Validity,0.7543,245775,🔴,geolocation_zip_code_prefix: 245733 invalid | geolocation_lat: 31 invalid | geolocation_lng: 37 invalid | geolocation_state: 0 invalid
+olist_geolocation,Consistency,1.0,0,🟢,0 righe violano almeno una regola di consistenza

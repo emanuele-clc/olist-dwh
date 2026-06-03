@@ -1,0 +1,49 @@
+{
+  "table": "sellers",
+  "steps": [
+    {
+      "step_id": 1,
+      "name": "Cleansing di seller_id",
+      "description": "Rimuovi i dati non numeriche e trasformi i valori in numerici.",
+      "columns": [
+        "seller_id"
+      ],
+      "pandas_method": "clean_string",
+      "priority": "high",
+      "business_impact": "Rimozione dei dati non utilizzabili"
+    },
+    {
+      "step_id": 2,
+      "name": "Cleansing di seller_zip_code_prefix",
+      "description": "Trasforma i valori della colonna zip_code_prefix in stringhe con 5 caratteri.",
+      "columns": [
+        "seller_zip_code_prefix"
+      ],
+      "pandas_method": "pad_to_length",
+      "priority": "medium",
+      "business_impact": "Rimuovi le eventuali informazioni non utilizzabili"
+    },
+    {
+      "step_id": 3,
+      "name": "Cleansing di seller_city",
+      "description": "Rimuovi i dati nulli e trasforma i valori in stringhe con più di 4 caratteri.",
+      "columns": [
+        "seller_city"
+      ],
+      "pandas_method": "remove_null_andtruncate",
+      "priority": "medium",
+      "business_impact": "Rimozione dei dati non utilizzabili"
+    },
+    {
+      "step_id": 4,
+      "name": "Cleansing di seller_state",
+      "description": "Rimuovi i dati nulli e trasforma i valori in stringhe con più di 2 caratteri.",
+      "columns": [
+        "seller_state"
+      ],
+      "pandas_method": "remove_null_andtruncate",
+      "priority": "low",
+      "business_impact": "Rimozione dei dati non utilizzabili"
+    }
+  ]
+}

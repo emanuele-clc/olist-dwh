@@ -1,0 +1,42 @@
+Table,Dimension,Score,Issues,Status,Details
+olist_orders,Completeness,0.9938,4908,🟢,"Missing per col: {'order_approved_at': 160, 'order_delivered_carrier_date': 1783, 'order_delivered_customer_date': 2965}"
+olist_orders,Uniqueness,1.0,0,🟢,Righe duplicate su ['order_id']: 0
+olist_orders,Validity,1.0,0,🟢,order_id: 0 invalid | customer_id: 0 invalid | order_status: 0 invalid | order_purchase_timestamp: 0 invalid
+olist_orders,Consistency,0.9698,3003,🟢,3003 righe violano almeno una regola di consistenza
+olist_orders,Precision,1.0,0,🟢,No numeric col specified – precision assumed 100%
+olist_customers,Completeness,1.0,0,🟢,Missing per col: {}
+olist_customers,Uniqueness,1.0,0,🟢,Righe duplicate su ['customer_id']: 0
+olist_customers,Validity,0.7587,23995,🔴,customer_id: 0 invalid | customer_unique_id: 0 invalid | customer_zip_code_prefix: 23995 invalid | customer_state: 0 invalid
+olist_customers,Consistency,1.0,0,🟢,0 righe violano almeno una regola di consistenza
+olist_order_items,Completeness,1.0,0,🟢,Missing per col: {}
+olist_order_items,Uniqueness,1.0,0,🟢,"Righe duplicate su ['order_id', 'order_item_id']: 0"
+olist_order_items,Validity,1.0,0,🟢,price: 0 invalid | freight_value: 0 invalid | order_item_id: 0 invalid | shipping_limit_date: 0 invalid
+olist_order_items,Consistency,1.0,0,🟢,0 righe violano almeno una regola di consistenza
+olist_order_items,Precision,0.9825,1966,🟢,"Variance ±3.0σ: mean=120.65, std=183.63, range=[-430.25, 671.56]"
+olist_order_payments,Completeness,1.0,0,🟢,Missing per col: {}
+olist_order_payments,Uniqueness,1.0,0,🟢,"Righe duplicate su ['order_id', 'payment_sequential']: 0"
+olist_order_payments,Validity,1.0,0,🟢,payment_type: 0 invalid | payment_value: 0 invalid | payment_installments: 0 invalid | payment_sequential: 0 invalid
+olist_order_payments,Consistency,1.0,2,🟢,2 righe violano almeno una regola di consistenza
+olist_order_payments,Precision,0.9826,1803,🟢,"Variance ±3.0σ: mean=154.10, std=217.49, range=[-498.38, 806.58]"
+olist_order_reviews,Completeness,1.0,0,🟢,Missing per col: {}
+olist_order_reviews,Uniqueness,0.9838,1603,🟢,Righe duplicate su ['review_id']: 1603
+olist_order_reviews,Validity,1.0,0,🟢,review_score: 0 invalid | review_id: 0 invalid | order_id: 0 invalid | review_creation_date: 0 invalid | review_answer_timestamp: 0 invalid
+olist_order_reviews,Consistency,1.0,0,🟢,0 righe violano almeno una regola di consistenza
+olist_order_reviews,Precision,1.0,0,🟢,"Variance ±3.0σ: mean=4.09, std=1.35, range=[0.04, 8.13]"
+olist_products,Completeness,0.9917,2448,🟢,"Missing per col: {'product_category_name': 610, 'product_name_lenght': 610, 'product_description_lenght': 610, 'product_photos_qty': 610, 'product_weight_g': 2, 'product_length_cm': 2, 'product_height_cm': 2, 'product_width_cm': 2}"
+olist_products,Uniqueness,1.0,0,🟢,Righe duplicate su ['product_id']: 0
+olist_products,Validity,0.9999,4,🟢,product_weight_g: 4 invalid | product_length_cm: 0 invalid | product_height_cm: 0 invalid | product_width_cm: 0 invalid | product_photos_qty: 0 invalid | product_name_lenght: 0 invalid | product_description_lenght: 0 invalid
+olist_products,Consistency,0.9999,2,🟢,2 righe violano almeno una regola di consistenza
+olist_products,Precision,0.9708,961,🟢,"Variance ±3.0σ: mean=2276.47, std=4282.04, range=[-10569.64, 15122.59]"
+olist_sellers,Completeness,1.0,0,🟢,Missing per col: {}
+olist_sellers,Uniqueness,1.0,0,🟢,Righe duplicate su ['seller_id']: 0
+olist_sellers,Validity,0.6682,1027,🔴,seller_id: 0 invalid | seller_zip_code_prefix: 1027 invalid | seller_state: 0 invalid
+olist_sellers,Consistency,1.0,0,🟢,0 righe violano almeno una regola di consistenza
+olist_geolocation,Completeness,1.0,0,🟢,Missing per col: {}
+olist_geolocation,Uniqueness,0.001,999120,🔴,Righe duplicate su ['geolocation_zip_code_prefix']: 999120
+olist_geolocation,Validity,0.7543,245775,🔴,geolocation_zip_code_prefix: 245733 invalid | geolocation_lat: 31 invalid | geolocation_lng: 37 invalid | geolocation_state: 0 invalid
+olist_geolocation,Consistency,1.0,0,🟢,0 righe violano almeno una regola di consistenza
+product_category_translation,Completeness,1.0,0,🟢,Missing per col: {}
+product_category_translation,Uniqueness,1.0,0,🟢,Righe duplicate su ['product_category_name']: 0
+product_category_translation,Validity,1.0,0,🟢,product_category_name: 0 invalid | product_category_name_english: 0 invalid
+product_category_translation,Consistency,1.0,0,🟢,0 righe violano almeno una regola di consistenza

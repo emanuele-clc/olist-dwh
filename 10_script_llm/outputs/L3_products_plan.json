@@ -1,0 +1,61 @@
+{
+  "table": "products",
+  "steps": [
+    {
+      "step_id": 1,
+      "name": "Elimina colonne con pochi valori unici",
+      "description": "Rimuovere le colonne con pochi valori unici per ridurre la dimensione del dataset e migliorare la velocità della pipeline di cleaning.",
+      "columns": [
+        "product_category_name",
+        "product_name_lenght",
+        "product_description_lenght",
+        "product_photos_qty"
+      ],
+      "pandas_method": "duplicated().sum() > 10",
+      "priority": "high",
+      "business_impact": "Riduzione dei tempi di elaborazione e miglioramento dell'efficienza della pipeline"
+    },
+    {
+      "step_id": 2,
+      "name": "Trasforma colonne numeriche in tipo float64",
+      "description": "Assicurarsi che le colonne numeriche siano trasformate in float64 per consentire operazioni matematiche precise.",
+      "columns": [
+        "product_name_lenght",
+        "product_description_lenght",
+        "product_photos_qty",
+        "product_weight_g",
+        "product_length_cm",
+        "product_height_cm",
+        "product_width_cm"
+      ],
+      "pandas_method": "",
+      "priority": "medium",
+      "business_impact": "Miglioramento dell'accuratezza dei dati e riduzione degli errori"
+    },
+    {
+      "step_id": 3,
+      "name": "Rimuovi colonne con valori null",
+      "description": "Eliminare le colonne con valori null per migliorare la qualità dei dati.",
+      "columns": [
+        "product_category_name",
+        "product_name_lenght",
+        "product_description_lenght",
+        "product_photos_qty"
+      ],
+      "pandas_method": "isnull().sum() > 0",
+      "priority": "medium",
+      "business_impact": "Miglioramento della qualità dei dati e riduzione degli errori"
+    },
+    {
+      "step_id": 4,
+      "name": "Trasforma colonne categorical in tipo object",
+      "description": "Assicurarsi che le colonne categorical siano trasformate in tipo object per consentire trattamento standard.",
+      "columns": [
+        "product_category_name"
+      ],
+      "pandas_method": "",
+      "priority": "low",
+      "business_impact": "Miglioramento della capacità di analisi e trattamento dei dati"
+    }
+  ]
+}

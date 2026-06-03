@@ -1,0 +1,42 @@
+{
+  "table": "reviews",
+  "steps": [
+    {
+      "step_id": 1,
+      "name": "Cleaning e elimina duplicate",
+      "description": "Elimina le righe duplicate della colonna review_comment_title.",
+      "columns": [
+        "review_comment_title"
+      ],
+      "pandas_method": "drop_duplicates(subset='review_comment_title', keep='first')",
+      "priority": "high"
+    },
+    {
+      "step_id": 2,
+      "name": "Rimozione caratteri non numerici da review_score e review_creation_date",
+      "description": "Rimuovi i caratteri non numerici dalle colonne review_score e review_creation_date.",
+      "columns": [
+        "review_score",
+        "review_creation_date"
+      ],
+      "pandas_method": [
+        "str.replace(to_replace='[^0-9]', value='', regex=True)",
+        "pd.to_numeric"
+      ],
+      "priority": "medium"
+    },
+    {
+      "step_id": 3,
+      "name": "Elimina righe con valori null",
+      "description": "Elimina le righe con valori null nelle colonne review_comment_title e review_comment_message.",
+      "columns": [
+        "review_comment_title",
+        "review_comment_message"
+      ],
+      "pandas_method": [
+        "notnull().dropna()"
+      ],
+      "priority": "low"
+    }
+  ]
+}

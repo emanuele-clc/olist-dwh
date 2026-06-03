@@ -1,0 +1,5 @@
+Table,Dimension,Score,Issues,Status,Details
+olist_customers,Completeness,1.0,0,🟢,Missing per col: {}
+olist_customers,Uniqueness,1.0,0,🟢,Righe duplicate su ['customer_id']: 0
+olist_customers,Validity,0.7587,23995,🔴,customer_id: 0 invalid | customer_unique_id: 0 invalid | customer_zip_code_prefix: 23995 invalid | customer_state: 0 invalid
+olist_customers,Consistency,1.0,0,🟢,0 righe violano almeno una regola di consistenza

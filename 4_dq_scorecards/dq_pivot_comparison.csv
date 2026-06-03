@@ -1,0 +1,6 @@
+Dimension,olist_customers,olist_geolocation,olist_order_items,olist_order_payments,olist_order_reviews,olist_orders,olist_products,olist_sellers,product_category_translation
+Completeness,1.0,1.0,1.0,1.0,1.0,0.9938,0.9917,1.0,1.0
+Consistency,1.0,1.0,1.0,1.0,1.0,0.9698,0.9999,1.0,1.0
+Precision,,,0.9825,0.9826,1.0,1.0,0.9708,,
+Uniqueness,1.0,0.001,1.0,1.0,0.9838,1.0,1.0,1.0,1.0
+Validity,0.7587,0.7543,1.0,1.0,1.0,1.0,0.9999,0.6682,1.0

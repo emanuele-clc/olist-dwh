@@ -1,0 +1,41 @@
+{
+  "table": "payments",
+  "steps": [
+    {
+      "step_id": 1,
+      "name": "Step 1: Rimozione valori nulli",
+      "description": "Rimuovere le righe con valori nulli in ogni colonna",
+      "columns": [],
+      "pandas_method": "",
+      "priority": "high",
+      "business_impact": "Elimina dati aberranti e migliora la qualità dei dati"
+    },
+    {
+      "step_id": 2,
+      "name": "Step 2: Valutazione tipi di pagamenti",
+      "description": "Verificare i tipi di pagamento e aggiornarli secondo le norme del business",
+      "columns": [],
+      "pandas_method": "",
+      "priority": "high",
+      "business_impact": "Garantire l'omogeneità dei dati e semplificare le analisi"
+    },
+    {
+      "step_id": 3,
+      "name": "Step 3: Normalizzazione valori di pagamento",
+      "description": "Normalizzare i valori di pagamento per ottenere un range standardizzato",
+      "columns": [],
+      "pandas_method": "",
+      "priority": "medium",
+      "business_impact": "Migliorare la chiarezza dei dati e semplificare le operazioni"
+    },
+    {
+      "step_id": 4,
+      "name": "Step 4: Eliminazione duplicati",
+      "description": "Eliminare le duplicate righe per prevenire errori di calcolo",
+      "columns": [],
+      "pandas_method": "",
+      "priority": "low",
+      "business_impact": "Prevenire errori di calcolo e migliorare la stabilità del sistema"
+    }
+  ]
+}

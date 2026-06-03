@@ -1,0 +1,12 @@
+{
+  "total_revenue": 15200441.25,
+  "total_sales": 112650,
+  "unique_orders": 98666,
+  "unique_customers": 98666,
+  "avg_price": 115.3,
+  "avg_review": 4.04,
+  "avg_delay_days": -12.03,
+  "top_state": "SP",
+  "top_category": "health_beauty",
+  "top_payment": "credit_card"
+}

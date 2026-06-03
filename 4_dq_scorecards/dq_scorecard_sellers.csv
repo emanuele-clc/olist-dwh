@@ -1,0 +1,5 @@
+Table,Dimension,Score,Issues,Status,Details
+olist_sellers,Completeness,1.0,0,🟢,Missing per col: {}
+olist_sellers,Uniqueness,1.0,0,🟢,Righe duplicate su ['seller_id']: 0
+olist_sellers,Validity,0.6682,1027,🔴,seller_id: 0 invalid | seller_zip_code_prefix: 1027 invalid | seller_state: 0 invalid
+olist_sellers,Consistency,1.0,0,🟢,0 righe violano almeno una regola di consistenza

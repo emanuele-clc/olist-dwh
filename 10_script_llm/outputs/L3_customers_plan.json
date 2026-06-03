@@ -1,0 +1,34 @@
+{
+  "table": "customers",
+  "steps": [
+    {
+      "step_id": 1,
+      "name": "Rimuovi codici zip superflui",
+      "description": "Rimuovere i codici zip prefix che hanno valore minimo (1003)",
+      "columns": [
+        "customer_zip_code_prefix"
+      ],
+      "pandas_method": "dropna",
+      "priority": "high",
+      "business_impact": "Eliminazione dei dati non rilevanti"
+    },
+    {
+      "step_id": 2,
+      "name": "Trasformare tipi di dati di zip_code_prefix",
+      "description": "Convertire i valori di zip_code_prefix da int64 a str",
+      "columns": [
+        "customer_zip_code_prefix"
+      ],
+      "pandas_method": "apply(lambda x: str(x) if isinstance(x, int) else x)"
+    },
+    {
+      "step_id": 3,
+      "name": "Rimuovi duplicate customer_unique_id",
+      "description": "Eliminare le righe duplicate di customer_unique_id",
+      "columns": [
+        "customer_unique_id"
+      ],
+      "pandas_method": "drop_duplicates"
+    }
+  ]
+}

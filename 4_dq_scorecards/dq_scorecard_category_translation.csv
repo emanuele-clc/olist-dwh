@@ -1,0 +1,5 @@
+Table,Dimension,Score,Issues,Status,Details
+product_category_translation,Completeness,1.0,0,🟢,Missing per col: {}
+product_category_translation,Uniqueness,1.0,0,🟢,Righe duplicate su ['product_category_name']: 0
+product_category_translation,Validity,1.0,0,🟢,product_category_name: 0 invalid | product_category_name_english: 0 invalid
+product_category_translation,Consistency,1.0,0,🟢,0 righe violano almeno una regola di consistenza

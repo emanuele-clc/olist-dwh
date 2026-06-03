@@ -1,0 +1,6 @@
+Table,Dimension,Score,Issues,Status,Details
+olist_orders,Completeness,0.9938,4908,🟢,"Missing per col: {'order_approved_at': 160, 'order_delivered_carrier_date': 1783, 'order_delivered_customer_date': 2965}"
+olist_orders,Uniqueness,1.0,0,🟢,Righe duplicate su ['order_id']: 0
+olist_orders,Validity,1.0,0,🟢,order_id: 0 invalid | customer_id: 0 invalid | order_status: 0 invalid | order_purchase_timestamp: 0 invalid
+olist_orders,Consistency,0.9698,3003,🟢,3003 righe violano almeno una regola di consistenza
+olist_orders,Precision,1.0,0,🟢,No numeric col specified – precision assumed 100%
