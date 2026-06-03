@@ -1,82 +1,60 @@
-# Olist Data Warehouse — Setup
+# Progetto Data Warehouse — Olist Brazilian E-Commerce
 
-## Requisiti
-
-- Python 3.9+
-- Jupyter Notebook o JupyterLab
-- Librerie: `pandas`, `numpy`, `sqlite3` (incluso in Python), `matplotlib`, `seaborn`
-
-Installa tutto con:
-```bash
-pip install pandas numpy matplotlib seaborn jupyter
-```
+**Corso:** Laboratorio di Basi di Dati  
+**Studente:** Emanuele Colecchia  
+**Anno Accademico:** 2025/2026
 
 ---
 
-## Setup su un nuovo PC
+## Descrizione del progetto
 
-### 1. Clona la repository
-```bash
-git clone https://github.com/emanuele-clc/olist-dwh.git
-cd olist-dwh
-```
-
-### 2. Scarica i raw data da Kaggle
-Vai su: https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce
-
-Scarica il dataset e metti i seguenti file nella cartella `1_raw_data/`:
-
-```
-olist_customers_dataset.csv
-olist_geolocation_dataset.csv
-olist_order_items_dataset.csv
-olist_order_payments_dataset.csv
-olist_order_reviews_dataset.csv
-olist_orders_dataset.csv
-olist_products_dataset.csv
-olist_sellers_dataset.csv
-product_category_name_translation.csv
-```
-
-> Il file `olist_geolocation_dataset.csv` è escluso dalla repo perché pesa 58MB.
-
-### 3. Esegui il notebook principale
-```bash
-jupyter notebook 2_scripts/olist_dw_cleaning_pipeline.ipynb
-```
-
-Esegui tutte le celle in ordine. Il notebook:
-- Pulisce i dati grezzi
-- Costruisce il database SQLite (`6_database/olist_dw.db`)
-- Esporta i CSV del Data Warehouse in `9_exported_from_db/`
-
-### 4. Apri Tableau
-- Apri `8_tableau/Cartella1.twb`
-- Se Tableau chiede di ricollegare i dati, punta alla cartella `9_exported_from_db/`
+Il progetto riguarda la progettazione e implementazione di un Data Warehouse a partire dal dataset pubblico *Brazilian E-Commerce* di Olist, disponibile su Kaggle. Il lavoro comprende una fase di valutazione della qualità dei dati, una pipeline di cleaning, la costruzione del database in SQLite con architettura a stella, e la realizzazione di analisi OLAP tramite Tableau.
 
 ---
 
-## Struttura della cartella
+## Struttura della repository
 
 ```
 consegna/
-├── 1_raw_data/          # Dataset originali Olist (da Kaggle)
-├── 2_scripts/           # Notebook ETL e cleaning pipeline
-├── 3_cleaned_data/      # CSV puliti dopo la cleaning pipeline
-├── 4_dq_scorecards/     # Scorecard Data Quality (CSV)
-├── 5_dq_plots/          # Grafici Data Quality (PNG)
+├── 1_raw_data/          # Dataset originali Olist (sorgente: Kaggle)
+├── 2_scripts/           # Notebook Jupyter: cleaning pipeline ed ETL
+├── 3_cleaned_data/      # CSV risultanti dalla fase di cleaning
+├── 4_dq_scorecards/     # Scorecard di Data Quality per ogni tabella
+├── 5_dq_plots/          # Grafici di Data Quality (prima e dopo cleaning)
 ├── 6_database/          # Database SQLite (olist_dw.db)
-├── 7_report/            # Relazione LaTeX + PDF
-├── 8_tableau/           # Visualizzazioni Tableau (.twb)
-├── 9_exported_from_db/  # CSV del DWH esportati dal DB (dim_* e fact_sales)
-├── 10_script_llm/       # Output LLM per DQ Assessment e Cleaning
+├── 7_report/            # Relazione tecnica in LaTeX e PDF
+├── 8_tableau/           # File Tableau (.twb) con dashboard e story
+├── 9_exported_from_db/  # CSV esportati dal DWH (dimensioni e fact table)
+├── 10_script_llm/       # Output LLM utilizzati per il DQ Assessment
 └── README.md
 ```
 
 ---
 
+## Requisiti tecnici
+
+- Python 3.9+
+- Jupyter Notebook
+- Librerie Python: `pandas`, `numpy`, `matplotlib`, `seaborn`
+- Tableau Desktop (per la visualizzazione)
+
+---
+
+## Riproduzione del progetto
+
+Per riprodurre l'intero progetto su una nuova macchina è sufficiente eseguire il notebook principale in ordine:
+
+```
+2_scripts/olist_dw_cleaning_pipeline.ipynb
+```
+
+Il notebook esegue automaticamente la pulizia dei dati, la costruzione del database SQLite e l'esportazione dei CSV del Data Warehouse nella cartella `9_exported_from_db/`.
+
+Il file Tableau `8_tableau/Cartella1.twb` è preconfigurato e si collega ai CSV presenti in `9_exported_from_db/`.
+
+---
+
 ## Note
 
-- I file grandi (`olist_geolocation_dataset.csv`, `olist_dw.db`) sono gestiti con Git LFS.
-- La story Tableau è già configurata e si collega automaticamente ai CSV in `9_exported_from_db/`.
-- Il database può essere rigenerato eseguendo `2_scripts/olist_dw_cleaning_pipeline.ipynb`.
+- Il dataset originale è disponibile pubblicamente su Kaggle: https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce
+- I file di grandi dimensioni (`olist_geolocation_dataset.csv`, `olist_dw.db`) sono gestiti tramite Git LFS.
