@@ -62,10 +62,14 @@ Esegui tutte le celle in ordine. Il notebook:
 consegna/
 ├── 1_raw_data/          # Dataset originali Olist (da Kaggle)
 ├── 2_scripts/           # Notebook ETL e cleaning pipeline
-├── 6_database/          # Database SQLite generato (non in repo)
+├── 3_cleaned_data/      # CSV puliti dopo la cleaning pipeline
+├── 4_dq_scorecards/     # Scorecard Data Quality (CSV)
+├── 5_dq_plots/          # Grafici Data Quality (PNG)
+├── 6_database/          # Database SQLite (olist_dw.db)
 ├── 7_report/            # Relazione LaTeX + PDF
 ├── 8_tableau/           # Visualizzazioni Tableau (.twb)
-├── 9_exported_from_db/  # CSV del DWH esportati dal DB
+├── 9_exported_from_db/  # CSV del DWH esportati dal DB (dim_* e fact_sales)
+├── 10_script_llm/       # Output LLM per DQ Assessment e Cleaning
 └── README.md
 ```
 
@@ -73,5 +77,6 @@ consegna/
 
 ## Note
 
-- Il database `olist_dw.db` non è incluso nella repo perché supera i 100MB. Viene generato eseguendo il notebook.
+- I file grandi (`olist_geolocation_dataset.csv`, `olist_dw.db`) sono gestiti con Git LFS.
 - La story Tableau è già configurata e si collega automaticamente ai CSV in `9_exported_from_db/`.
+- Il database può essere rigenerato eseguendo `2_scripts/olist_dw_cleaning_pipeline.ipynb`.
