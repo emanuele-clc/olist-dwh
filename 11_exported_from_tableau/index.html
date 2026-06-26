@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Olist E-Commerce · Data Warehouse Analysis</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Space+Grotesk:wght@400;600;700&display=swap');
+
+:root {
+  --blue:   #2d7dd2;
+  --green:  #3a9b6f;
+  --orange: #e07b39;
+  --red:    #c0392b;
+  --dark:   #080e14;
+  --panel:  #0d1823;
+  --border: #162436;
+  --text:   #c8d8e8;
+  --muted:  #5a7a92;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--dark);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* ── HERO ─────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content:'';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 30%, rgba(45,125,210,.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 70%, rgba(58,155,111,.14) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 50% 90%, rgba(224,123,57,.10) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(45,125,210,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45,125,210,.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(45,125,210,.12);
+  border: 1px solid rgba(45,125,210,.3);
+  color: #7ab8f0;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: 100px;
+  margin-bottom: 32px;
+}
+
+.chip::before {
+  content:'';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #2d7dd2;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,100%{ opacity:1; transform:scale(1); }
+  50%     { opacity:.4; transform:scale(1.4); }
+}
+
+.hero h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(2.8rem, 7vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.hero h1 .accent-blue   { color: #2d7dd2; }
+.hero h1 .accent-green  { color: #3a9b6f; }
+.hero h1 .accent-orange { color: #e07b39; }
+
+.hero-sub {
+  font-size: 1.15rem;
+  color: var(--muted);
+  max-width: 580px;
+  line-height: 1.7;
+  margin: 20px auto 52px;
+}
+
+.stats-row {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(13,24,35,.8);
+  backdrop-filter: blur(10px);
+  margin-bottom: 52px;
+}
+
+.stat {
+  flex: 1;
+  padding: 28px 32px;
+  border-right: 1px solid var(--border);
+  text-align: center;
+}
+.stat:last-child { border-right: none; }
+
+.stat .val {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.stat .lbl {
+  font-size: .7rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.scroll-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: .75rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.arrow {
+  width: 28px; height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%,100%{ transform:translateY(0); }
+  50%     { transform:translateY(5px); }
+}
+
+/* ── NAV ───────────────────────────────────── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(8,14,20,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+}
+
+.nav-brand {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: .9rem;
+  color: #fff;
+  letter-spacing: -.3px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--muted);
+  font-size: .8rem;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 8px;
+  transition: all .2s;
+}
+
+.nav-links a:hover { color:#fff; background: var(--border); }
+.nav-links a.active { color:#fff; background: rgba(45,125,210,.2); }
+
+/* ── SECTIONS ──────────────────────────────── */
+.section-wrap {
+  padding: 100px 24px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.tag-line {
+  width: 28px;
+  height: 2px;
+  border-radius: 2px;
+}
+
+.section-wrap h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -.5px;
+  margin-bottom: 14px;
+  line-height: 1.15;
+}
+
+.section-wrap .desc {
+  color: var(--muted);
+  font-size: 1rem;
+  max-width: 620px;
+  line-height: 1.75;
+  margin-bottom: 40px;
+}
+
+/* ── DASHBOARD IMAGE ────────────────────────── */
+.img-wrap {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  cursor: zoom-in;
+  margin-bottom: 32px;
+}
+
+.img-wrap::after {
+  content: '🔍  Click to enlarge';
+  position: absolute;
+  bottom: 16px; right: 16px;
+  background: rgba(8,14,20,.85);
+  color: var(--muted);
+  font-size: .72rem;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  opacity: 0;
+  transition: opacity .25s;
+}
+
+.img-wrap:hover::after { opacity: 1; }
+
+.img-wrap img {
+  width: 100%;
+  display: block;
+  transition: transform .35s;
+}
+
+.img-wrap:hover img { transform: scale(1.015); }
+
+/* ── OLAP TAGS ──────────────────────────────── */
+.olap-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.olap-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .5px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1px solid;
+}
+
+/* ── CARDS ──────────────────────────────────── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  transition: transform .2s, border-color .2s;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+.card-icon {
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+}
+
+.card h4 {
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.card p {
+  font-size: .85rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ── COLORS PER SECTION ─────────────────────── */
+/* Blue — Delivery */
+.c-blue .section-tag  { color: #2d7dd2; }
+.c-blue .tag-line     { background: #2d7dd2; }
+.c-blue .olap-tag     { background: rgba(45,125,210,.1); border-color: rgba(45,125,210,.3); color: #7ab8f0; }
+.c-blue .card:hover   { border-color: rgba(45,125,210,.4); }
+.c-blue .card h4      { color: #2d7dd2; }
+.c-blue .img-wrap     { box-shadow: 0 0 60px rgba(45,125,210,.08); }
+.c-blue .img-wrap:hover { box-shadow: 0 0 80px rgba(45,125,210,.18); }
+
+/* Green — Geographic */
+.c-green .section-tag { color: #3a9b6f; }
+.c-green .tag-line    { background: #3a9b6f; }
+.c-green .olap-tag    { background: rgba(58,155,111,.1); border-color: rgba(58,155,111,.3); color: #6dceaa; }
+.c-green .card:hover  { border-color: rgba(58,155,111,.4); }
+.c-green .card h4     { color: #3a9b6f; }
+.c-green .img-wrap    { box-shadow: 0 0 60px rgba(58,155,111,.08); }
+.c-green .img-wrap:hover { box-shadow: 0 0 80px rgba(58,155,111,.18); }
+
+/* Orange — Sales */
+.c-orange .section-tag{ color: #e07b39; }
+.c-orange .tag-line   { background: #e07b39; }
+.c-orange .olap-tag   { background: rgba(224,123,57,.1); border-color: rgba(224,123,57,.3); color: #f0aa78; }
+.c-orange .card:hover { border-color: rgba(224,123,57,.4); }
+.c-orange .card h4    { color: #e07b39; }
+.c-orange .img-wrap   { box-shadow: 0 0 60px rgba(224,123,57,.08); }
+.c-orange .img-wrap:hover { box-shadow: 0 0 80px rgba(224,123,57,.18); }
+
+/* Red — Trends */
+.c-red .section-tag   { color: #e05a4e; }
+.c-red .tag-line      { background: #e05a4e; }
+.c-red .olap-tag      { background: rgba(224,90,78,.1); border-color: rgba(224,90,78,.3); color: #f09890; }
+.c-red .card:hover    { border-color: rgba(224,90,78,.4); }
+.c-red .card h4       { color: #e05a4e; }
+.c-red .img-wrap      { box-shadow: 0 0 60px rgba(224,90,78,.08); }
+.c-red .img-wrap:hover { box-shadow: 0 0 80px rgba(224,90,78,.18); }
+
+/* ── SEPARATOR ──────────────────────────────── */
+.sep {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 0 24px;
+}
+
+/* ── FOOTER ─────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--muted);
+  font-size: .8rem;
+  border-top: 1px solid var(--border);
+  line-height: 2;
+}
+
+footer strong { color: #fff; }
+
+/* ── LIGHTBOX ───────────────────────────────── */
+#lb {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.95);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+#lb.open { display: flex; }
+#lb img {
+  max-width: 96vw;
+  max-height: 92vh;
+  border-radius: 10px;
+  box-shadow: 0 0 80px rgba(255,255,255,.06);
+}
+#lb-x {
+  position: fixed;
+  top: 18px; right: 22px;
+  font-size: 1.8rem;
+  color: var(--muted);
+  cursor: pointer;
+  line-height: 1;
+  transition: color .15s;
+}
+#lb-x:hover { color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- LIGHTBOX -->
+<div id="lb" onclick="closeLb()">
+  <span id="lb-x">&times;</span>
+  <img id="lb-img" src="" alt=""/>
+</div>
+
+<!-- ════════════════ HERO ════════════════ -->
+<div class="hero">
+  <div class="hero-grid"></div>
+
+  <div class="chip">Data Warehouse &amp; Visualization &nbsp;·&nbsp; UniCal &nbsp;·&nbsp; 2025/2026</div>
+
+  <h1>
+    <span class="accent-blue">Olist</span><br>
+    <span class="accent-green">E-Commerce</span><br>
+    <span class="accent-orange">Analysis</span>
+  </h1>
+
+  <p class="hero-sub">
+    A complete data warehouse project built on <strong style="color:#fff">100,000+ real orders</strong>
+    from the Brazilian marketplace Olist (2016–2018) — from ETL pipeline to interactive Tableau dashboards.
+  </p>
+
+  <div class="stats-row">
+    <div class="stat">
+      <div class="val" data-target="112650">0</div>
+      <div class="lbl">Order Items</div>
+    </div>
+    <div class="stat">
+      <div class="val" data-target="99441">0</div>
+      <div class="lbl">Customers</div>
+    </div>
+    <div class="stat">
+      <div class="val" data-target="3095">0</div>
+      <div class="lbl">Sellers</div>
+    </div>
+    <div class="stat">
+      <div class="val" data-target="4">0</div>
+      <div class="lbl">Dashboards</div>
+    </div>
+  </div>
+
+  <div class="scroll-cta">
+    <span>Explore the dashboards</span>
+    <div class="arrow">↓</div>
+  </div>
+</div>
+
+<!-- ════════════════ NAV ════════════════ -->
+<nav>
+  <div class="nav-brand">Olist DW </div>
+  <div class="nav-links">
+    <a href="#delivery">Delivery</a>
+    <a href="#geographic">Geographic</a>
+    <a href="#sales">Sales</a>
+    <a href="#trends">Trends</a>
+  </div>
+</nav>
+
+<!-- ════════════════ 01 — DELIVERY ════════════════ -->
+<div class="section-wrap c-blue" id="delivery">
+  <div class="section-tag">
+    <div class="tag-line"></div>
+    01 &mdash; Dashboard
+  </div>
+  <h2>Delivery Performance</h2>
+  <p class="desc">
+    Monitoring order fulfilment across Brazil — delivery lead times, delay distribution,
+    on-time rates by state, and a time-series breakdown by delivery speed category.
+  </p>
+
+  <div class="img-wrap" onclick="openLb('Olist E-Commerce — Delivery Performance.png')">
+    <img src="Olist E-Commerce — Delivery Performance.png" alt="Delivery Performance"/>
+  </div>
+
+  <div class="olap-row">
+    <span class="olap-tag">⬡ Slice — filter by state</span>
+    <span class="olap-tag">⬡ Dice — state + time period</span>
+    <span class="olap-tag">⬡ Roll-Up — city → state</span>
+    <span class="olap-tag">⬡ Drill-Down — year → month</span>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <h4>Avg. Lead Time</h4>
+      <p>Orders take an average of <strong style="color:#fff">12 days</strong> from purchase to delivery across all Brazilian states.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">✅</div>
+      <h4>Ahead of Schedule</h4>
+      <p>Deliveries arrive on average <strong style="color:#fff">12 days before</strong> the estimated date — strong logistics performance.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🗺️</div>
+      <h4>Geographic Gap</h4>
+      <p>Northern states such as AM and RR show significantly <strong style="color:#fff">longer delivery times</strong> than the Southeast.</p>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ════════════════ 02 — GEOGRAPHIC ════════════════ -->
+<div class="section-wrap c-green" id="geographic">
+  <div class="section-tag">
+    <div class="tag-line"></div>
+    02 &mdash; Dashboard
+  </div>
+  <h2>Geographic Analysis</h2>
+  <p class="desc">
+    Spatial distribution of customers, orders, and revenue across all 27 Brazilian states —
+    with a filled choropleth map, state treemap, and revenue ranking.
+  </p>
+
+  <div class="img-wrap" onclick="openLb('Geographic Analysis.png')">
+    <img src="Geographic Analysis.png" alt="Geographic Analysis"/>
+  </div>
+
+  <div class="olap-row">
+    <span class="olap-tag">⬡ Slice — filter by state</span>
+    <span class="olap-tag">⬡ Drill-Down — state → city</span>
+    <span class="olap-tag">⬡ Dice — region + category</span>
+    <span class="olap-tag">⬡ Roll-Up — city → state → region</span>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🏙️</div>
+      <h4>São Paulo Dominates</h4>
+      <p>SP accounts for the <strong style="color:#fff">largest share</strong> of customers and revenue — over 40% of all orders.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📍</div>
+      <h4>27 States Covered</h4>
+      <p>Orders placed from <strong style="color:#fff">every Brazilian state</strong>, with strong concentration in the Southeast.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">💰</div>
+      <h4>Revenue Concentration</h4>
+      <p>Top 5 states generate over <strong style="color:#fff">70% of total platform revenue</strong>.</p>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ════════════════ 03 — SALES ════════════════ -->
+<div class="section-wrap c-orange" id="sales">
+  <div class="section-tag">
+    <div class="tag-line"></div>
+    03 &mdash; Dashboard
+  </div>
+  <h2>Sales Analysis</h2>
+  <p class="desc">
+    Payment behaviour, customer satisfaction scores, and revenue breakdown by product category —
+    with treemap, bar charts, and KPI indicators.
+  </p>
+
+  <div class="img-wrap" onclick="openLb('Sales Analysis.png')">
+    <img src="Sales Analysis.png" alt="Sales Analysis"/>
+  </div>
+
+  <div class="olap-row">
+    <span class="olap-tag">⬡ Slice — filter by payment type</span>
+    <span class="olap-tag">⬡ Dice — category + rating</span>
+    <span class="olap-tag">⬡ Roll-Up — product → category</span>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">💳</div>
+      <h4>Credit Card Rules</h4>
+      <p><strong style="color:#fff">75.9%</strong> of all orders paid by credit card — dominant across all states and categories.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⭐</div>
+      <h4>High Satisfaction</h4>
+      <p>Over <strong style="color:#fff">56,000 orders</strong> received a 5-star review — the single most common rating.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🛍️</div>
+      <h4>Top Category</h4>
+      <p><strong style="color:#fff">Beleza e Saúde</strong> (Beauty &amp; Health) leads all product categories in total revenue.</p>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ════════════════ 04 — TRENDS ════════════════ -->
+<div class="section-wrap c-red" id="trends">
+  <div class="section-tag">
+    <div class="tag-line"></div>
+    04 &mdash; Dashboard
+  </div>
+  <h2>Time Trends</h2>
+  <p class="desc">
+    Order volume and revenue evolution from 2016 to 2018 — monthly line charts, yearly bar chart,
+    and a month × year heatmap demonstrating the Pivot OLAP operation.
+  </p>
+
+  <div class="img-wrap" onclick="openLb('Time Trends.png')">
+    <img src="Time Trends.png" alt="Time Trends"/>
+  </div>
+
+  <div class="olap-row">
+    <span class="olap-tag">⬡ Roll-Up — month → year</span>
+    <span class="olap-tag">⬡ Drill-Down — year → month</span>
+    <span class="olap-tag">⬡ Pivot — month × year heatmap</span>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">📈</div>
+      <h4>Strong YoY Growth</h4>
+      <p>Order volumes grew <strong style="color:#fff">consistently year over year</strong> from 2016 through mid-2018.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🗓️</div>
+      <h4>Seasonal Peaks</h4>
+      <p><strong style="color:#fff">November and January</strong> show recurring spikes — Black Friday and post-holiday shopping.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔥</div>
+      <h4>2018 Best Year</h4>
+      <p>2018 was the strongest year with over <strong style="color:#fff">54,000 orders</strong> in just the first 8 months.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ FOOTER ════════════════ -->
+<footer>
+  <strong>Emanuele Colecchia</strong> &nbsp;·&nbsp; Matricola 276527<br>
+  Data Warehouse and Visualization &nbsp;·&nbsp; Università della Calabria &nbsp;·&nbsp; A.A. 2025/2026<br>
+  <span style="color:#2a3a4a; margin-top:8px; display:block">Dataset: Brazilian E-Commerce Public Dataset by Olist · Kaggle</span>
+</footer>
+
+<script>
+/* ── Counter animation ── */
+function animateCounter(el) {
+  const target = parseInt(el.dataset.target);
+  const duration = 1600;
+  const start = performance.now();
+  function step(now) {
+    const p = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    const val = Math.round(ease * target);
+    el.textContent = val >= 1000
+      ? (val >= 100000 ? (val/1000).toFixed(0)+'K' : val.toLocaleString('en'))
+      : val;
+    if (p < 1) requestAnimationFrame(step);
+    else el.textContent = target >= 1000
+      ? (target >= 100000 ? (target/1000).toFixed(0)+'K' : target.toLocaleString('en'))
+      : target;
+  }
+  requestAnimationFrame(step);
+}
+
+const counters = document.querySelectorAll('[data-target]');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { animateCounter(e.target); obs.unobserve(e.target); } });
+}, { threshold: 0.5 });
+counters.forEach(c => obs.observe(c));
+
+/* ── Active nav ── */
+const sections = document.querySelectorAll('.section-wrap[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) cur = s.id; });
+  navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
+}, { passive: true });
+
+/* ── Lightbox ── */
+function openLb(src) {
+  document.getElementById('lb-img').src = src;
+  document.getElementById('lb').classList.add('open');
+}
+function closeLb() {
+  document.getElementById('lb').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
+</script>
+</body>
+</html>
