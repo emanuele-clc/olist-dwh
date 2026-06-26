@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -12,6 +12,7 @@
   --green:  #3a9b6f;
   --orange: #e07b39;
   --red:    #c0392b;
+  --purple: #8b5cf6;
   --dark:   #080e14;
   --panel:  #0d1823;
   --border: #162436;
@@ -20,339 +21,233 @@
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
-
 html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: var(--dark); color: var(--text); overflow-x: hidden; }
 
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--dark);
-  color: var(--text);
-  overflow-x: hidden;
-}
-
-/* ── HERO ─────────────────────────────────── */
+/* ── HERO ── */
 .hero {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 60px 24px;
-  position: relative;
-  overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 60px 24px; position: relative; overflow: hidden;
 }
-
 .hero::before {
-  content:'';
-  position: absolute;
-  inset: 0;
+  content:''; position: absolute; inset: 0;
   background:
     radial-gradient(ellipse 80% 60% at 20% 30%, rgba(45,125,210,.18) 0%, transparent 60%),
     radial-gradient(ellipse 60% 50% at 80% 70%, rgba(58,155,111,.14) 0%, transparent 55%),
     radial-gradient(ellipse 50% 40% at 50% 90%, rgba(224,123,57,.10) 0%, transparent 50%);
   pointer-events: none;
 }
-
 .hero-grid {
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   background-image:
     linear-gradient(rgba(45,125,210,.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(45,125,210,.04) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none;
+  background-size: 60px 60px; pointer-events: none;
 }
-
 .chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(45,125,210,.12);
-  border: 1px solid rgba(45,125,210,.3);
-  color: #7ab8f0;
-  font-size: .72rem;
-  font-weight: 600;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  padding: 6px 16px;
-  border-radius: 100px;
-  margin-bottom: 32px;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(45,125,210,.12); border: 1px solid rgba(45,125,210,.3);
+  color: #7ab8f0; font-size: .72rem; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; padding: 6px 16px; border-radius: 100px; margin-bottom: 32px;
 }
-
 .chip::before {
-  content:'';
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: #2d7dd2;
+  content:''; width: 6px; height: 6px; border-radius: 50%; background: #2d7dd2;
   animation: pulse 2s infinite;
 }
-
-@keyframes pulse {
-  0%,100%{ opacity:1; transform:scale(1); }
-  50%     { opacity:.4; transform:scale(1.4); }
-}
-
+@keyframes pulse { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:.4; transform:scale(1.4); } }
 .hero h1 {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(2.8rem, 7vw, 5.5rem);
-  font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -2px;
-  color: #fff;
-  margin-bottom: 10px;
+  font-family: 'Space Grotesk', sans-serif; font-size: clamp(2.8rem, 7vw, 5.5rem);
+  font-weight: 700; line-height: 1.05; letter-spacing: -2px; color: #fff; margin-bottom: 10px;
 }
-
 .hero h1 .accent-blue   { color: #2d7dd2; }
 .hero h1 .accent-green  { color: #3a9b6f; }
 .hero h1 .accent-orange { color: #e07b39; }
-
-.hero-sub {
-  font-size: 1.15rem;
-  color: var(--muted);
-  max-width: 580px;
-  line-height: 1.7;
-  margin: 20px auto 52px;
-}
-
+.hero-sub { font-size: 1.1rem; color: var(--muted); max-width: 600px; line-height: 1.7; margin: 20px auto 52px; }
 .stats-row {
-  display: flex;
-  gap: 0;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  overflow: hidden;
-  background: rgba(13,24,35,.8);
-  backdrop-filter: blur(10px);
-  margin-bottom: 52px;
+  display: flex; gap: 0; border: 1px solid var(--border); border-radius: 16px;
+  overflow: hidden; background: rgba(13,24,35,.8); backdrop-filter: blur(10px); margin-bottom: 52px;
 }
-
-.stat {
-  flex: 1;
-  padding: 28px 32px;
-  border-right: 1px solid var(--border);
-  text-align: center;
-}
+.stat { flex: 1; padding: 28px 32px; border-right: 1px solid var(--border); text-align: center; }
 .stat:last-child { border-right: none; }
+.stat .val { font-family: 'Space Grotesk', sans-serif; font-size: 2.2rem; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 6px; }
+.stat .lbl { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
+.scroll-cta { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--muted); font-size: .75rem; letter-spacing: 2px; text-transform: uppercase; }
+.arrow { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; animation: bounce 2s infinite; }
+@keyframes bounce { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(5px); } }
 
-.stat .val {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #fff;
-  line-height: 1;
-  margin-bottom: 6px;
-}
-
-.stat .lbl {
-  font-size: .7rem;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-}
-
-.scroll-cta {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-  font-size: .75rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-.arrow {
-  width: 28px; height: 28px;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-  0%,100%{ transform:translateY(0); }
-  50%     { transform:translateY(5px); }
-}
-
-/* ── NAV ───────────────────────────────────── */
+/* ── NAV ── */
 nav {
-  position: sticky;
-  top: 0;
-  z-index: 200;
-  background: rgba(8,14,20,.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 56px;
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(8,14,20,.92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border); padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between; height: 56px;
+  flex-wrap: wrap; gap: 4px;
 }
-
-.nav-brand {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  font-size: .9rem;
-  color: #fff;
-  letter-spacing: -.3px;
-}
-
-.nav-links {
-  display: flex;
-  gap: 4px;
-}
-
-.nav-links a {
-  text-decoration: none;
-  color: var(--muted);
-  font-size: .8rem;
-  font-weight: 500;
-  padding: 6px 14px;
-  border-radius: 8px;
-  transition: all .2s;
-}
-
+.nav-brand { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: .9rem; color: #fff; letter-spacing: -.3px; }
+.nav-links { display: flex; gap: 2px; flex-wrap: wrap; }
+.nav-links a { text-decoration: none; color: var(--muted); font-size: .75rem; font-weight: 500; padding: 5px 10px; border-radius: 8px; transition: all .2s; }
 .nav-links a:hover { color:#fff; background: var(--border); }
 .nav-links a.active { color:#fff; background: rgba(45,125,210,.2); }
 
-/* ── SECTIONS ──────────────────────────────── */
-.section-wrap {
-  padding: 100px 24px;
-  max-width: 1180px;
-  margin: 0 auto;
-}
+/* ── SECTIONS ── */
+.section-wrap { padding: 90px 24px; max-width: 1180px; margin: 0 auto; }
+.section-tag { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: .72rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; }
+.tag-line { width: 28px; height: 2px; border-radius: 2px; }
+.section-wrap h2 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; color: #fff; letter-spacing: -.5px; margin-bottom: 14px; line-height: 1.15; }
+.section-wrap .desc { color: var(--muted); font-size: 1rem; max-width: 680px; line-height: 1.75; margin-bottom: 40px; }
 
-.section-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-  font-size: .72rem;
-  font-weight: 600;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+/* ── PIPELINE ── */
+.pipeline {
+  display: flex; gap: 0; align-items: stretch; flex-wrap: wrap;
+  border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+  background: var(--panel); margin-bottom: 48px;
 }
-
-.tag-line {
-  width: 28px;
-  height: 2px;
-  border-radius: 2px;
+.pipe-step {
+  flex: 1; min-width: 120px; padding: 28px 20px; text-align: center;
+  border-right: 1px solid var(--border); position: relative;
+  transition: background .2s;
 }
-
-.section-wrap h2 {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -.5px;
-  margin-bottom: 14px;
-  line-height: 1.15;
+.pipe-step:last-child { border-right: none; }
+.pipe-step:hover { background: rgba(45,125,210,.06); }
+.pipe-num { font-family: 'Space Grotesk', sans-serif; font-size: .65rem; color: var(--muted); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+.pipe-icon { font-size: 1.8rem; margin-bottom: 10px; }
+.pipe-label { font-size: .78rem; font-weight: 600; color: #fff; margin-bottom: 6px; line-height: 1.3; }
+.pipe-sub { font-size: .68rem; color: var(--muted); line-height: 1.5; }
+.pipe-arrow {
+  position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
+  background: var(--dark); border: 1px solid var(--border); border-radius: 50%;
+  width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+  font-size: .6rem; color: var(--muted); z-index: 1;
 }
+.pipe-step:last-child .pipe-arrow { display: none; }
 
-.section-wrap .desc {
-  color: var(--muted);
-  font-size: 1rem;
-  max-width: 620px;
-  line-height: 1.75;
-  margin-bottom: 40px;
+/* ── DQA GRID ── */
+.dqa-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 16px; margin-bottom: 40px; }
+.dqa-card {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+  padding: 22px 20px; transition: transform .2s, border-color .2s;
 }
+.dqa-card:hover { transform: translateY(-3px); border-color: rgba(139,92,246,.4); }
+.dqa-card .dqa-table { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; font-weight: 700; color: #8b5cf6; }
+.dqa-card .dqa-problem { font-size: .82rem; font-weight: 600; color: #fff; margin-bottom: 6px; line-height: 1.4; }
+.dqa-card .dqa-fix { font-size: .78rem; color: var(--muted); line-height: 1.5; }
+.dqa-card .dqa-badge {
+  display: inline-block; font-size: .62rem; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; padding: 2px 8px; border-radius: 6px; margin-bottom: 10px;
+}
+.badge-wrong    { background: rgba(192,57,43,.15); color: #e07070; border: 1px solid rgba(192,57,43,.3); }
+.badge-dup      { background: rgba(224,123,57,.15); color: #f0aa78; border: 1px solid rgba(224,123,57,.3); }
+.badge-missing  { background: rgba(45,125,210,.15); color: #7ab8f0; border: 1px solid rgba(45,125,210,.3); }
+.badge-noisy    { background: rgba(58,155,111,.15); color: #6dceaa; border: 1px solid rgba(58,155,111,.3); }
+.badge-varying  { background: rgba(139,92,246,.15); color: #c4b5fd; border: 1px solid rgba(139,92,246,.3); }
+.badge-dep      { background: rgba(224,90,78,.15); color: #f09890; border: 1px solid rgba(224,90,78,.3); }
 
-/* ── DASHBOARD IMAGE ────────────────────────── */
+/* ── LLM BOX ── */
+.llm-box {
+  background: rgba(139,92,246,.06); border: 1px solid rgba(139,92,246,.25);
+  border-radius: 14px; padding: 28px; margin-bottom: 40px;
+}
+.llm-box h3 { font-size: .72rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #8b5cf6; margin-bottom: 16px; }
+.llm-levels { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 16px; }
+.llm-level { background: rgba(13,24,35,.6); border: 1px solid rgba(139,92,246,.15); border-radius: 10px; padding: 18px; }
+.llm-level .llm-tag { font-size: .68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #a78bfa; margin-bottom: 8px; }
+.llm-level .llm-title { font-size: .9rem; font-weight: 600; color: #fff; margin-bottom: 6px; }
+.llm-level .llm-desc { font-size: .8rem; color: var(--muted); line-height: 1.55; }
+
+/* ── STAR SCHEMA ── */
+.star-container { position: relative; margin-bottom: 48px; }
+.star-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 16px;
+  max-width: 900px; margin: 0 auto;
+}
+.schema-table {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; transition: transform .2s, box-shadow .2s;
+}
+.schema-table:hover { transform: translateY(-3px); }
+.schema-table.fact { border-color: rgba(45,125,210,.5); box-shadow: 0 0 40px rgba(45,125,210,.12); }
+.schema-table.dim  { border-color: rgba(58,155,111,.3); }
+.schema-header { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.schema-header .t-label { font-size: .62rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 2px; }
+.schema-header .t-name  { font-family: 'Space Grotesk', sans-serif; font-size: .95rem; font-weight: 700; color: #fff; }
+.schema-header .t-rows  { font-size: .68rem; color: var(--muted); margin-top: 2px; }
+.fact .schema-header .t-label { color: #7ab8f0; }
+.dim  .schema-header .t-label { color: #6dceaa; }
+.schema-fields { padding: 12px 16px; }
+.field { display: flex; align-items: baseline; gap: 8px; padding: 3px 0; border-bottom: 1px solid rgba(22,36,54,.7); }
+.field:last-child { border-bottom: none; }
+.field-name { font-size: .75rem; font-weight: 500; color: var(--text); font-family: monospace; }
+.field-type { font-size: .65rem; color: var(--muted); }
+.field-note { font-size: .62rem; color: #8b5cf6; margin-left: auto; white-space: nowrap; }
+.field-note.pk  { color: #f0aa78; }
+.field-note.fk  { color: #7ab8f0; }
+.field-note.add { color: #6dceaa; }
+.field-note.semi{ color: #c4b5fd; }
+.field-note.nonadd { color: #f09890; }
+
+/* center the fact table spanning full row */
+.star-fact { grid-column: 2; grid-row: 2; }
+.star-dim-top-l { grid-column: 1; grid-row: 1; }
+.star-dim-top-r { grid-column: 3; grid-row: 1; }
+.star-dim-bot-l { grid-column: 1; grid-row: 3; }
+.star-dim-bot-r { grid-column: 3; grid-row: 3; }
+.star-dim-mid   { grid-column: 2; grid-row: 1; }
+
+.measures-legend {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; justify-content: center;
+}
+.m-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: .72rem; font-weight: 600; padding: 5px 12px; border-radius: 8px; border: 1px solid;
+}
+.m-add  { background: rgba(58,155,111,.1); border-color: rgba(58,155,111,.3); color: #6dceaa; }
+.m-semi { background: rgba(139,92,246,.1); border-color: rgba(139,92,246,.3); color: #c4b5fd; }
+.m-nonadd { background: rgba(224,90,78,.1); border-color: rgba(224,90,78,.3); color: #f09890; }
+.m-ord  { background: rgba(224,123,57,.1); border-color: rgba(224,123,57,.3); color: #f0aa78; }
+
+/* ── DASHBOARD IMAGE ── */
 .img-wrap {
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  cursor: zoom-in;
-  margin-bottom: 32px;
+  position: relative; border-radius: 16px; overflow: hidden;
+  border: 1px solid var(--border); cursor: zoom-in; margin-bottom: 32px;
 }
-
 .img-wrap::after {
-  content: '🔍  Click to enlarge';
-  position: absolute;
-  bottom: 16px; right: 16px;
-  background: rgba(8,14,20,.85);
-  color: var(--muted);
-  font-size: .72rem;
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  opacity: 0;
-  transition: opacity .25s;
+  content: '🔍  Clicca per ingrandire'; position: absolute; bottom: 16px; right: 16px;
+  background: rgba(8,14,20,.85); color: var(--muted); font-size: .72rem;
+  padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border);
+  opacity: 0; transition: opacity .25s;
 }
-
 .img-wrap:hover::after { opacity: 1; }
-
-.img-wrap img {
-  width: 100%;
-  display: block;
-  transition: transform .35s;
-}
-
+.img-wrap img { width: 100%; display: block; transition: transform .35s; }
 .img-wrap:hover img { transform: scale(1.015); }
 
-/* ── OLAP TAGS ──────────────────────────────── */
-.olap-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 32px;
-}
+/* ── OLAP TAGS ── */
+.olap-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+.olap-tag { display: inline-flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 600; letter-spacing: .5px; padding: 5px 12px; border-radius: 8px; border: 1px solid; }
 
-.olap-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: .72rem;
-  font-weight: 600;
-  letter-spacing: .5px;
-  padding: 5px 12px;
-  border-radius: 8px;
-  border: 1px solid;
-}
+/* ── CARDS ── */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 24px; transition: transform .2s, border-color .2s; }
+.card:hover { transform: translateY(-3px); }
+.card-icon { font-size: 1.5rem; margin-bottom: 12px; }
+.card h4 { font-size: .78rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+.card p { font-size: .85rem; color: var(--muted); line-height: 1.6; }
 
-/* ── CARDS ──────────────────────────────────── */
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+/* ── KEY FINDINGS ── */
+.findings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 20px; margin-bottom: 40px; }
+.finding {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+  padding: 26px; transition: transform .2s, border-color .2s;
 }
+.finding:hover { transform: translateY(-3px); }
+.finding-num { font-family: 'Space Grotesk', sans-serif; font-size: 2.4rem; font-weight: 700; line-height: 1; margin-bottom: 8px; }
+.finding-label { font-size: .72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.finding p { font-size: .85rem; color: var(--muted); line-height: 1.6; }
 
-.card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 24px;
-  transition: transform .2s, border-color .2s;
-}
-
-.card:hover {
-  transform: translateY(-3px);
-}
-
-.card-icon {
-  font-size: 1.5rem;
-  margin-bottom: 12px;
-}
-
-.card h4 {
-  font-size: .78rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.card p {
-  font-size: .85rem;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-/* ── COLORS PER SECTION ─────────────────────── */
-/* Blue — Delivery */
+/* ── COLORS ── */
 .c-blue .section-tag  { color: #2d7dd2; }
 .c-blue .tag-line     { background: #2d7dd2; }
 .c-blue .olap-tag     { background: rgba(45,125,210,.1); border-color: rgba(45,125,210,.3); color: #7ab8f0; }
@@ -361,7 +256,6 @@ nav {
 .c-blue .img-wrap     { box-shadow: 0 0 60px rgba(45,125,210,.08); }
 .c-blue .img-wrap:hover { box-shadow: 0 0 80px rgba(45,125,210,.18); }
 
-/* Green — Geographic */
 .c-green .section-tag { color: #3a9b6f; }
 .c-green .tag-line    { background: #3a9b6f; }
 .c-green .olap-tag    { background: rgba(58,155,111,.1); border-color: rgba(58,155,111,.3); color: #6dceaa; }
@@ -370,7 +264,6 @@ nav {
 .c-green .img-wrap    { box-shadow: 0 0 60px rgba(58,155,111,.08); }
 .c-green .img-wrap:hover { box-shadow: 0 0 80px rgba(58,155,111,.18); }
 
-/* Orange — Sales */
 .c-orange .section-tag{ color: #e07b39; }
 .c-orange .tag-line   { background: #e07b39; }
 .c-orange .olap-tag   { background: rgba(224,123,57,.1); border-color: rgba(224,123,57,.3); color: #f0aa78; }
@@ -379,7 +272,6 @@ nav {
 .c-orange .img-wrap   { box-shadow: 0 0 60px rgba(224,123,57,.08); }
 .c-orange .img-wrap:hover { box-shadow: 0 0 80px rgba(224,123,57,.18); }
 
-/* Red — Trends */
 .c-red .section-tag   { color: #e05a4e; }
 .c-red .tag-line      { background: #e05a4e; }
 .c-red .olap-tag      { background: rgba(224,90,78,.1); border-color: rgba(224,90,78,.3); color: #f09890; }
@@ -388,52 +280,27 @@ nav {
 .c-red .img-wrap      { box-shadow: 0 0 60px rgba(224,90,78,.08); }
 .c-red .img-wrap:hover { box-shadow: 0 0 80px rgba(224,90,78,.18); }
 
-/* ── SEPARATOR ──────────────────────────────── */
-.sep {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border), transparent);
-  margin: 0 24px;
-}
+.c-purple .section-tag { color: #8b5cf6; }
+.c-purple .tag-line    { background: #8b5cf6; }
+.c-purple .card:hover  { border-color: rgba(139,92,246,.4); }
+.c-purple .card h4     { color: #8b5cf6; }
 
-/* ── FOOTER ─────────────────────────────────── */
-footer {
-  text-align: center;
-  padding: 60px 24px;
-  color: var(--muted);
-  font-size: .8rem;
-  border-top: 1px solid var(--border);
-  line-height: 2;
-}
+.c-findings .section-tag { color: #e07b39; }
+.c-findings .tag-line    { background: #e07b39; }
+.c-findings .finding:hover { border-color: rgba(224,123,57,.4); }
 
+/* ── SEP ── */
+.sep { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 0 24px; }
+
+/* ── FOOTER ── */
+footer { text-align: center; padding: 60px 24px; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); line-height: 2; }
 footer strong { color: #fff; }
 
-/* ── LIGHTBOX ───────────────────────────────── */
-#lb {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.95);
-  z-index: 999;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
+/* ── LIGHTBOX ── */
+#lb { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.95); z-index: 999; align-items: center; justify-content: center; padding: 24px; }
 #lb.open { display: flex; }
-#lb img {
-  max-width: 96vw;
-  max-height: 92vh;
-  border-radius: 10px;
-  box-shadow: 0 0 80px rgba(255,255,255,.06);
-}
-#lb-x {
-  position: fixed;
-  top: 18px; right: 22px;
-  font-size: 1.8rem;
-  color: var(--muted);
-  cursor: pointer;
-  line-height: 1;
-  transition: color .15s;
-}
+#lb img { max-width: 96vw; max-height: 92vh; border-radius: 10px; box-shadow: 0 0 80px rgba(255,255,255,.06); }
+#lb-x { position: fixed; top: 18px; right: 22px; font-size: 1.8rem; color: var(--muted); cursor: pointer; line-height: 1; transition: color .15s; }
 #lb-x:hover { color: #fff; }
 </style>
 </head>
@@ -445,69 +312,337 @@ footer strong { color: #fff; }
   <img id="lb-img" src="" alt=""/>
 </div>
 
-<!-- ════════════════ HERO ════════════════ -->
+<!-- ══════════════ HERO ══════════════ -->
 <div class="hero">
   <div class="hero-grid"></div>
-
   <div class="chip">Data Warehouse &amp; Visualization &nbsp;·&nbsp; UniCal &nbsp;·&nbsp; 2025/2026</div>
-
   <h1>
     <span class="accent-blue">Olist</span><br>
     <span class="accent-green">E-Commerce</span><br>
     <span class="accent-orange">Analysis</span>
   </h1>
-
   <p class="hero-sub">
-    A complete data warehouse project built on <strong style="color:#fff">100,000+ real orders</strong>
-    from the Brazilian marketplace Olist (2016–2018) — from ETL pipeline to interactive Tableau dashboards.
+    Un data warehouse completo costruito su <strong style="color:#fff">100.000+ ordini reali</strong>
+    dal marketplace brasiliano Olist (2016–2018) — dalla pipeline ETL alle dashboard Tableau interattive.
   </p>
-
   <div class="stats-row">
-    <div class="stat">
-      <div class="val" data-target="112650">0</div>
-      <div class="lbl">Order Items</div>
-    </div>
-    <div class="stat">
-      <div class="val" data-target="99441">0</div>
-      <div class="lbl">Customers</div>
-    </div>
-    <div class="stat">
-      <div class="val" data-target="3095">0</div>
-      <div class="lbl">Sellers</div>
-    </div>
-    <div class="stat">
-      <div class="val" data-target="4">0</div>
-      <div class="lbl">Dashboards</div>
-    </div>
+    <div class="stat"><div class="val" data-target="112650">0</div><div class="lbl">Order Items</div></div>
+    <div class="stat"><div class="val" data-target="99441">0</div><div class="lbl">Clienti</div></div>
+    <div class="stat"><div class="val" data-target="3095">0</div><div class="lbl">Venditori</div></div>
+    <div class="stat"><div class="val" data-target="9">0</div><div class="lbl">File CSV sorgente</div></div>
+    <div class="stat"><div class="val" data-target="4">0</div><div class="lbl">Dashboard</div></div>
   </div>
-
   <div class="scroll-cta">
-    <span>Explore the dashboards</span>
+    <span>Esplora il progetto</span>
     <div class="arrow">↓</div>
   </div>
 </div>
 
-<!-- ════════════════ NAV ════════════════ -->
+<!-- ══════════════ NAV ══════════════ -->
 <nav>
-  <div class="nav-brand">Olist DW </div>
+  <div class="nav-brand">Olist DW</div>
   <div class="nav-links">
+    <a href="#pipeline">Pipeline</a>
+    <a href="#dqa">DQA</a>
+    <a href="#schema">Star Schema</a>
     <a href="#delivery">Delivery</a>
     <a href="#geographic">Geographic</a>
     <a href="#sales">Sales</a>
     <a href="#trends">Trends</a>
+    <a href="#findings">Findings</a>
   </div>
 </nav>
 
-<!-- ════════════════ 01 — DELIVERY ════════════════ -->
-<div class="section-wrap c-blue" id="delivery">
-  <div class="section-tag">
-    <div class="tag-line"></div>
-    01 &mdash; Dashboard
+<!-- ══════════════ PIPELINE ══════════════ -->
+<div class="section-wrap c-blue" id="pipeline">
+  <div class="section-tag"><div class="tag-line"></div>Architettura del Progetto</div>
+  <h2>Pipeline End-to-End</h2>
+  <p class="desc">
+    Dal dataset grezzo su Kaggle al data warehouse finale: 7 fasi sequenziali che trasformano
+    9 file CSV in un sistema analitico interrogabile con Tableau.
+  </p>
+
+  <div class="pipeline">
+    <div class="pipe-step">
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-num">01</div>
+      <div class="pipe-icon">📦</div>
+      <div class="pipe-label">CSV Grezzi</div>
+      <div class="pipe-sub">9 file Kaggle<br>~100K ordini</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-num">02</div>
+      <div class="pipe-icon">🔍</div>
+      <div class="pipe-label">DQA</div>
+      <div class="pipe-sub">Scorecard + LLM<br>llama3.2:3b</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-num">03</div>
+      <div class="pipe-icon">🧹</div>
+      <div class="pipe-label">Cleaning</div>
+      <div class="pipe-sub">Python/pandas<br>+ audit log</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-num">04</div>
+      <div class="pipe-icon">🗄️</div>
+      <div class="pipe-label">Reconciled DB</div>
+      <div class="pipe-sub">SQLite normalizzato<br>rec_olist.db</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-num">05</div>
+      <div class="pipe-icon">⚙️</div>
+      <div class="pipe-label">ETL</div>
+      <div class="pipe-sub">Extract<br>Transform · Load</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-num">06</div>
+      <div class="pipe-icon">⭐</div>
+      <div class="pipe-label">Star Schema</div>
+      <div class="pipe-sub">fact_sales<br>+ 5 dimensioni</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num">07</div>
+      <div class="pipe-icon">📊</div>
+      <div class="pipe-label">Tableau</div>
+      <div class="pipe-sub">4 dashboard<br>+ Story</div>
+    </div>
   </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🗂️</div>
+      <h4>Fatto scelto</h4>
+      <p>La granularità è la <strong style="color:#fff">riga d'ordine (Order Item)</strong> — l'acquisto di un singolo prodotto, la granularità più fine possibile per abilitare analisi per prodotto e venditore.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔗</div>
+      <h4>Due layer SQLite</h4>
+      <p><strong style="color:#fff">Reconciled layer</strong> (rec_*): dati puliti con flag di qualità. <strong style="color:#fff">DWH layer</strong> (dim_* + fact_sales): star schema ottimizzato per OLAP, senza flag.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🛡️</div>
+      <h4>Integrità verificata</h4>
+      <p>0 FK orfane in fact_sales verso tutte le dimensioni. Unica eccezione: 3 NULL in payment_type_id per ordini cancellati prima del pagamento — <strong style="color:#fff">semanticamente corretti</strong>.</p>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ══════════════ DQA ══════════════ -->
+<div class="section-wrap c-purple" id="dqa">
+  <div class="section-tag"><div class="tag-line" style="background:#8b5cf6"></div>Data Quality Assessment</div>
+  <h2>Problemi rilevati e corretti</h2>
+  <p class="desc">
+    Ogni tabella è stata profilata con una <strong style="color:#fff">scorecard programmatica</strong> (5 indici: Validity, Completeness, Uniqueness, Consistency, Precision)
+    e analizzata con il modello LLM <strong style="color:#fff">llama3.2:3b</strong> (locale via Ollama) per rilevare anomalie non catturabili da regole semplici.
+  </p>
+
+  <div class="llm-box">
+    <h3>🤖 Integrazione LLM — llama3.2:3b via Ollama (locale, offline)</h3>
+    <div class="llm-levels">
+      <div class="llm-level">
+        <div class="llm-tag">L1 — Narrativa DQA</div>
+        <div class="llm-title">Analisi qualitativa per tabella</div>
+        <div class="llm-desc">Il profilo statistico (null, duplicati, min/max/std) viene passato al LLM che produce una narrativa dei problemi e orienta il cleaning. Per Geolocation ha evidenziato che le coordinate fuori range derivavano probabilmente da un errore di segno sulla longitudine.</div>
+      </div>
+      <div class="llm-level">
+        <div class="llm-tag">L2 — Classificazione MCAR/MAR/MNAR</div>
+        <div class="llm-title">Tipo di missingness per ogni colonna null</div>
+        <div class="llm-desc">Il LLM classifica ogni colonna con null come MCAR (casuale), MAR (correlato ad attributi osservabili) o MNAR (correlato al valore stesso). Determina la strategia di imputazione ottimale.</div>
+      </div>
+      <div class="llm-level">
+        <div class="llm-tag">L3 — Cleaning Plan + Audit Narrative</div>
+        <div class="llm-title">Piano prioritizzato e narrativa post-cleaning</div>
+        <div class="llm-desc">Il LLM pianifica gli interventi con priorità high/medium/low. Dopo il cleaning produce una narrativa testuale registrata nell'audit log — tracciabilità completa di ogni modifica.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dqa-grid">
+    <div class="dqa-card">
+      <div class="dqa-table">Customers · Sellers</div>
+      <div class="dqa-badge badge-wrong">Wrong Values</div>
+      <div class="dqa-problem">CAP a 4 cifre (zero iniziale perso)</div>
+      <div class="dqa-fix">Il CSV memorizza il campo come numero intero, perdendo lo 0 iniziale. <strong style="color:#fff">Limite noto documentato</strong>, non corretto per non alterare la sorgente.</div>
+    </div>
+    <div class="dqa-card">
+      <div class="dqa-table">Customers · Sellers · Geolocation</div>
+      <div class="dqa-badge badge-varying">Varying Values</div>
+      <div class="dqa-problem">Nomi città in formato misto</div>
+      <div class="dqa-fix">"são paulo" vs "São Paulo" vs "SAO PAULO". Corretto con <code style="color:#a78bfa">str.title()</code> per garantire consistenza nei JOIN geografici.</div>
+    </div>
+    <div class="dqa-card">
+      <div class="dqa-table">Geolocation</div>
+      <div class="dqa-badge badge-dup">Record Duplication</div>
+      <div class="dqa-problem">261.831 righe duplicate per ZIP</div>
+      <div class="dqa-fix">1.000.163 → <strong style="color:#fff">19.015 record</strong> dopo deduplicazione e aggregazione per ZIP (centroide di lat/lng, moda di city/state).</div>
+    </div>
+    <div class="dqa-card">
+      <div class="dqa-table">Geolocation</div>
+      <div class="dqa-badge badge-wrong">Wrong Values</div>
+      <div class="dqa-problem">Coordinate fuori dal Brasile</div>
+      <div class="dqa-fix">lat ∉ [−33.75, 5.27] o lng ∉ [−73.99, −34.79]. Filtrati direttamente — nessun punto brasiliano può avere tali coordinate.</div>
+    </div>
+    <div class="dqa-card">
+      <div class="dqa-table">Products</div>
+      <div class="dqa-badge badge-missing">Missing Values</div>
+      <div class="dqa-problem">610 null in category_name (MCAR)</div>
+      <div class="dqa-fix">Classificati MCAR (nessun pattern sistematico). Fill-in con costante <code style="color:#a78bfa">"unknown"</code>. Misure fisiche (MAR) imputate con mediana.</div>
+    </div>
+    <div class="dqa-card">
+      <div class="dqa-table">Products</div>
+      <div class="dqa-badge badge-noisy">Noisy Data</div>
+      <div class="dqa-problem">Outlier in peso e dimensioni</div>
+      <div class="dqa-fix">Rilevati con metodo IQR (Q1 − 1.5·IQR / Q3 + 1.5·IQR). Valori originali preservati, flag binario <code style="color:#a78bfa">_outlier</code> aggiunto per tracciabilità.</div>
+    </div>
+    <div class="dqa-card">
+      <div class="dqa-table">Orders</div>
+      <div class="dqa-badge badge-dep">Attribute Dependencies</div>
+      <div class="dqa-problem">approved_at &lt; purchase_timestamp</div>
+      <div class="dqa-fix">~3.005 record violano la dipendenza temporale. Mantenuti nel reconciled DB (non corretti), tracciati con flag per successive analisi.</div>
+    </div>
+    <div class="dqa-card">
+      <div class="dqa-table">Reviews</div>
+      <div class="dqa-badge badge-dup">Uniqueness</div>
+      <div class="dqa-problem">review_id non è la chiave corretta</div>
+      <div class="dqa-fix">789 review_id associati a ≥2 order_id distinti. Chiave corretta: <code style="color:#a78bfa">(review_id, order_id)</code>. Salvati 814 record altrimenti persi erroneamente.</div>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ══════════════ STAR SCHEMA ══════════════ -->
+<div class="section-wrap c-green" id="schema">
+  <div class="section-tag"><div class="tag-line"></div>Progettazione Logica</div>
+  <h2>Star Schema del Data Warehouse</h2>
+  <p class="desc">
+    La fact table <strong style="color:#fff">fact_sales</strong> è al centro di 5 tabelle di dimensione denormalizzate.
+    Ogni record rappresenta l'acquisto di un singolo prodotto in un singolo ordine — granularità transazionale a livello Order Item.
+  </p>
+
+  <div class="star-grid">
+    <!-- dim_date top center -->
+    <div class="schema-table dim star-dim-mid">
+      <div class="schema-header">
+        <div class="t-label">Dimensione Tempo</div>
+        <div class="t-name">dim_date</div>
+        <div class="t-rows">634 date distinte · 2016–2018</div>
+      </div>
+      <div class="schema-fields">
+        <div class="field"><span class="field-name">date_id</span><span class="field-type">INT</span><span class="field-note pk">PK · YYYYMMDD</span></div>
+        <div class="field"><span class="field-name">year</span><span class="field-type">INT</span></div>
+        <div class="field"><span class="field-name">quarter</span><span class="field-type">INT</span></div>
+        <div class="field"><span class="field-name">month · month_name</span><span class="field-type">INT/TEXT</span></div>
+        <div class="field"><span class="field-name">day · weekday · is_weekend</span><span class="field-type">INT</span></div>
+      </div>
+    </div>
+
+    <!-- dim_product top-left -->
+    <div class="schema-table dim star-dim-top-l">
+      <div class="schema-header">
+        <div class="t-label">Dimensione Prodotto</div>
+        <div class="t-name">dim_product</div>
+        <div class="t-rows">32.951 prodotti</div>
+      </div>
+      <div class="schema-fields">
+        <div class="field"><span class="field-name">product_id</span><span class="field-type">TEXT</span><span class="field-note pk">PK</span></div>
+        <div class="field"><span class="field-name">category_name</span><span class="field-type">TEXT</span></div>
+        <div class="field"><span class="field-name">category_name_english</span><span class="field-type">TEXT</span></div>
+        <div class="field"><span class="field-name">weight_g · length_cm …</span><span class="field-type">REAL</span></div>
+      </div>
+    </div>
+
+    <!-- dim_customer top-right -->
+    <div class="schema-table dim star-dim-top-r">
+      <div class="schema-header">
+        <div class="t-label">Dimensione Cliente</div>
+        <div class="t-name">dim_customer</div>
+        <div class="t-rows">99.441 clienti</div>
+      </div>
+      <div class="schema-fields">
+        <div class="field"><span class="field-name">customer_id</span><span class="field-type">TEXT</span><span class="field-note pk">PK</span></div>
+        <div class="field"><span class="field-name">customer_unique_id</span><span class="field-type">TEXT</span></div>
+        <div class="field"><span class="field-name">city · state</span><span class="field-type">TEXT</span></div>
+        <div class="field"><span class="field-name">lat · lng</span><span class="field-type">REAL</span><span class="field-note" style="color:#5a7a92">da Geolocation</span></div>
+      </div>
+    </div>
+
+    <!-- fact_sales center -->
+    <div class="schema-table fact star-fact">
+      <div class="schema-header">
+        <div class="t-label">Fact Table — granularità Order Item</div>
+        <div class="t-name">fact_sales</div>
+        <div class="t-rows">112.650 righe</div>
+      </div>
+      <div class="schema-fields">
+        <div class="field"><span class="field-name">sale_id</span><span class="field-type">INT</span><span class="field-note pk">PK surrogata</span></div>
+        <div class="field"><span class="field-name">date_id</span><span class="field-type">INT</span><span class="field-note fk">FK → dim_date</span></div>
+        <div class="field"><span class="field-name">product_id</span><span class="field-type">TEXT</span><span class="field-note fk">FK → dim_product</span></div>
+        <div class="field"><span class="field-name">customer_id</span><span class="field-type">TEXT</span><span class="field-note fk">FK → dim_customer</span></div>
+        <div class="field"><span class="field-name">seller_id</span><span class="field-type">TEXT</span><span class="field-note fk">FK → dim_seller</span></div>
+        <div class="field"><span class="field-name">payment_type_id</span><span class="field-type">INT</span><span class="field-note fk">FK → dim_payment_type</span></div>
+        <div class="field"><span class="field-name">price · freight_value</span><span class="field-type">REAL</span><span class="field-note add">Additive SUM</span></div>
+        <div class="field"><span class="field-name">payment_value</span><span class="field-type">REAL</span><span class="field-note m-ord" style="color:#f0aa78;font-size:.6rem">Additiva solo x ordine</span></div>
+        <div class="field"><span class="field-name">delivery_lead_days</span><span class="field-type">REAL</span><span class="field-note semi">Semi-add AVG/MAX</span></div>
+        <div class="field"><span class="field-name">delivery_delay_days</span><span class="field-type">REAL</span><span class="field-note semi">Semi-add AVG/MAX</span></div>
+        <div class="field"><span class="field-name">review_score</span><span class="field-type">REAL</span><span class="field-note nonadd">Non-add AVG only</span></div>
+      </div>
+    </div>
+
+    <!-- dim_seller bottom-left -->
+    <div class="schema-table dim star-dim-bot-l">
+      <div class="schema-header">
+        <div class="t-label">Dimensione Venditore</div>
+        <div class="t-name">dim_seller</div>
+        <div class="t-rows">3.095 venditori</div>
+      </div>
+      <div class="schema-fields">
+        <div class="field"><span class="field-name">seller_id</span><span class="field-type">TEXT</span><span class="field-note pk">PK</span></div>
+        <div class="field"><span class="field-name">city · state</span><span class="field-type">TEXT</span></div>
+        <div class="field"><span class="field-name">lat · lng</span><span class="field-type">REAL</span><span class="field-note" style="color:#5a7a92">LEFT JOIN ZIP</span></div>
+      </div>
+    </div>
+
+    <!-- dim_payment_type bottom-right -->
+    <div class="schema-table dim star-dim-bot-r">
+      <div class="schema-header">
+        <div class="t-label">Dimensione Pagamento</div>
+        <div class="t-name">dim_payment_type</div>
+        <div class="t-rows">5 valori distinti</div>
+      </div>
+      <div class="schema-fields">
+        <div class="field"><span class="field-name">payment_type_id</span><span class="field-type">INT</span><span class="field-note pk">PK surrogata</span></div>
+        <div class="field"><span class="field-name">payment_type</span><span class="field-type">TEXT</span></div>
+        <div class="field" style="padding-top:8px"><span class="field-name" style="color:var(--muted);font-size:.68rem">credit_card 73.9% · boleto 19%</span></div>
+        <div class="field"><span class="field-name" style="color:var(--muted);font-size:.68rem">voucher 5.6% · debit_card 1.5%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="measures-legend">
+    <span class="m-badge m-add">● Additiva — SUM lungo tutte le dimensioni</span>
+    <span class="m-badge m-semi">● Semi-additiva — AVG/MAX/MIN (non SUM nel tempo)</span>
+    <span class="m-badge m-nonadd">● Non additiva — solo AVG</span>
+    <span class="m-badge m-ord">● Additiva solo a livello ordine — attenzione al doppio conteggio</span>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ══════════════ 01 — DELIVERY ══════════════ -->
+<div class="section-wrap c-blue" id="delivery">
+  <div class="section-tag"><div class="tag-line"></div>01 — Dashboard</div>
   <h2>Delivery Performance</h2>
   <p class="desc">
-    Monitoring order fulfilment across Brazil — delivery lead times, delay distribution,
-    on-time rates by state, and a time-series breakdown by delivery speed category.
+    Analisi delle consegne in tutto il Brasile — tempi di lead time, distribuzione dei ritardi,
+    percentuale di consegne in anticipo per stato, e serie temporale suddivisa per categoria di velocità.
   </p>
 
   <div class="img-wrap" onclick="openLb('Olist E-Commerce — Delivery Performance.png')">
@@ -515,43 +650,40 @@ footer strong { color: #fff; }
   </div>
 
   <div class="olap-row">
-    <span class="olap-tag">⬡ Slice — filter by state</span>
-    <span class="olap-tag">⬡ Dice — state + time period</span>
-    <span class="olap-tag">⬡ Roll-Up — city → state</span>
-    <span class="olap-tag">⬡ Drill-Down — year → month</span>
+    <span class="olap-tag">⬡ Slice — filtro per stato</span>
+    <span class="olap-tag">⬡ Dice — stato + periodo temporale</span>
+    <span class="olap-tag">⬡ Roll-Up — città → stato</span>
+    <span class="olap-tag">⬡ Drill-Down — anno → mese</span>
   </div>
 
   <div class="cards">
     <div class="card">
       <div class="card-icon">📦</div>
-      <h4>Avg. Lead Time</h4>
-      <p>Orders take an average of <strong style="color:#fff">12 days</strong> from purchase to delivery across all Brazilian states.</p>
+      <h4>Lead Time Mediano</h4>
+      <p>Gli ordini impiegano in media <strong style="color:#fff">12 giorni</strong> dall'acquisto alla consegna effettiva, con forti variazioni geografiche tra Nord e Sudest.</p>
     </div>
     <div class="card">
       <div class="card-icon">✅</div>
-      <h4>Ahead of Schedule</h4>
-      <p>Deliveries arrive on average <strong style="color:#fff">12 days before</strong> the estimated date — strong logistics performance.</p>
+      <h4>In Anticipo sulla Stima</h4>
+      <p>Le consegne arrivano in media <strong style="color:#fff">12 giorni prima</strong> della data stimata — la logistica di Olist performa significativamente meglio delle promesse.</p>
     </div>
     <div class="card">
       <div class="card-icon">🗺️</div>
-      <h4>Geographic Gap</h4>
-      <p>Northern states such as AM and RR show significantly <strong style="color:#fff">longer delivery times</strong> than the Southeast.</p>
+      <h4>Gap Geografico</h4>
+      <p>Gli stati del Nord (AM, RR, AP) mostrano tempi di consegna <strong style="color:#fff">2–3x più lunghi</strong> rispetto al Sudest — riflette le distanze e la minore infrastruttura logistica.</p>
     </div>
   </div>
 </div>
 
 <div class="sep"></div>
 
-<!-- ════════════════ 02 — GEOGRAPHIC ════════════════ -->
+<!-- ══════════════ 02 — GEOGRAPHIC ══════════════ -->
 <div class="section-wrap c-green" id="geographic">
-  <div class="section-tag">
-    <div class="tag-line"></div>
-    02 &mdash; Dashboard
-  </div>
+  <div class="section-tag"><div class="tag-line"></div>02 — Dashboard</div>
   <h2>Geographic Analysis</h2>
   <p class="desc">
-    Spatial distribution of customers, orders, and revenue across all 27 Brazilian states —
-    with a filled choropleth map, state treemap, and revenue ranking.
+    Distribuzione spaziale di clienti, ordini e fatturato su tutti i 27 stati brasiliani —
+    mappa choropleth riempita, treemap degli stati e classifica del fatturato.
   </p>
 
   <div class="img-wrap" onclick="openLb('Geographic Analysis.png')">
@@ -559,43 +691,40 @@ footer strong { color: #fff; }
   </div>
 
   <div class="olap-row">
-    <span class="olap-tag">⬡ Slice — filter by state</span>
-    <span class="olap-tag">⬡ Drill-Down — state → city</span>
-    <span class="olap-tag">⬡ Dice — region + category</span>
-    <span class="olap-tag">⬡ Roll-Up — city → state → region</span>
+    <span class="olap-tag">⬡ Slice — filtro per stato</span>
+    <span class="olap-tag">⬡ Drill-Down — stato → città</span>
+    <span class="olap-tag">⬡ Dice — regione + categoria prodotto</span>
+    <span class="olap-tag">⬡ Roll-Up — città → stato → regione</span>
   </div>
 
   <div class="cards">
     <div class="card">
       <div class="card-icon">🏙️</div>
-      <h4>São Paulo Dominates</h4>
-      <p>SP accounts for the <strong style="color:#fff">largest share</strong> of customers and revenue — over 40% of all orders.</p>
+      <h4>São Paulo Domina</h4>
+      <p>SP concentra oltre <strong style="color:#fff">il 40% di tutti gli ordini</strong> — un divario strutturale che riflette il peso economico del Sudest sul PIL brasiliano.</p>
     </div>
     <div class="card">
       <div class="card-icon">📍</div>
-      <h4>27 States Covered</h4>
-      <p>Orders placed from <strong style="color:#fff">every Brazilian state</strong>, with strong concentration in the Southeast.</p>
+      <h4>Copertura Completa</h4>
+      <p>Ordini da <strong style="color:#fff">tutti i 27 stati</strong> del Brasile. La mappa usa un campo calcolato CASE WHEN per convertire le abbreviazioni (SP → São Paulo) e abilitare la geocodifica Tableau.</p>
     </div>
     <div class="card">
       <div class="card-icon">💰</div>
-      <h4>Revenue Concentration</h4>
-      <p>Top 5 states generate over <strong style="color:#fff">70% of total platform revenue</strong>.</p>
+      <h4>Concentrazione Fatturato</h4>
+      <p>I primi 5 stati (SP, RJ, MG, RS, PR) generano oltre <strong style="color:#fff">il 70% del fatturato</strong> totale della piattaforma.</p>
     </div>
   </div>
 </div>
 
 <div class="sep"></div>
 
-<!-- ════════════════ 03 — SALES ════════════════ -->
+<!-- ══════════════ 03 — SALES ══════════════ -->
 <div class="section-wrap c-orange" id="sales">
-  <div class="section-tag">
-    <div class="tag-line"></div>
-    03 &mdash; Dashboard
-  </div>
+  <div class="section-tag"><div class="tag-line"></div>03 — Dashboard</div>
   <h2>Sales Analysis</h2>
   <p class="desc">
-    Payment behaviour, customer satisfaction scores, and revenue breakdown by product category —
-    with treemap, bar charts, and KPI indicators.
+    Comportamento di pagamento, soddisfazione dei clienti e breakdown del fatturato per categoria prodotto —
+    con treemap, grafici a barre e indicatori KPI.
   </p>
 
   <div class="img-wrap" onclick="openLb('Sales Analysis.png')">
@@ -603,42 +732,39 @@ footer strong { color: #fff; }
   </div>
 
   <div class="olap-row">
-    <span class="olap-tag">⬡ Slice — filter by payment type</span>
-    <span class="olap-tag">⬡ Dice — category + rating</span>
-    <span class="olap-tag">⬡ Roll-Up — product → category</span>
+    <span class="olap-tag">⬡ Slice — filtro per metodo di pagamento</span>
+    <span class="olap-tag">⬡ Dice — categoria + punteggio recensione</span>
+    <span class="olap-tag">⬡ Roll-Up — prodotto → categoria</span>
   </div>
 
   <div class="cards">
     <div class="card">
       <div class="card-icon">💳</div>
-      <h4>Credit Card Rules</h4>
-      <p><strong style="color:#fff">75.9%</strong> of all orders paid by credit card — dominant across all states and categories.</p>
+      <h4>Carta di Credito Domina</h4>
+      <p><strong style="color:#fff">73.9%</strong> degli ordini pagati con carta di credito. Il boleto bancário (tipico del Brasile) copre il 19% — riflette le abitudini di pagamento locali.</p>
     </div>
     <div class="card">
       <div class="card-icon">⭐</div>
-      <h4>High Satisfaction</h4>
-      <p>Over <strong style="color:#fff">56,000 orders</strong> received a 5-star review — the single most common rating.</p>
+      <h4>Alta Soddisfazione</h4>
+      <p>Oltre <strong style="color:#fff">56.000 ordini</strong> con 5 stelle — il rating più comune. La distribuzione è fortemente asimmetrica verso i valori alti.</p>
     </div>
     <div class="card">
       <div class="card-icon">🛍️</div>
-      <h4>Top Category</h4>
-      <p><strong style="color:#fff">Beleza e Saúde</strong> (Beauty &amp; Health) leads all product categories in total revenue.</p>
+      <h4>Top Categoria</h4>
+      <p><strong style="color:#fff">Beleza e Saúde</strong> (Beauty &amp; Health) guida il fatturato; Informatica e accessori guida il volume ordini.</p>
     </div>
   </div>
 </div>
 
 <div class="sep"></div>
 
-<!-- ════════════════ 04 — TRENDS ════════════════ -->
+<!-- ══════════════ 04 — TRENDS ══════════════ -->
 <div class="section-wrap c-red" id="trends">
-  <div class="section-tag">
-    <div class="tag-line"></div>
-    04 &mdash; Dashboard
-  </div>
+  <div class="section-tag"><div class="tag-line"></div>04 — Dashboard</div>
   <h2>Time Trends</h2>
   <p class="desc">
-    Order volume and revenue evolution from 2016 to 2018 — monthly line charts, yearly bar chart,
-    and a month × year heatmap demonstrating the Pivot OLAP operation.
+    Evoluzione di ordini e fatturato dal 2016 al 2018 — linee mensili per anno, barre annuali
+    e una heatmap mese × anno che dimostra l'operazione OLAP di Pivot.
   </p>
 
   <div class="img-wrap" onclick="openLb('Time Trends.png')">
@@ -646,58 +772,117 @@ footer strong { color: #fff; }
   </div>
 
   <div class="olap-row">
-    <span class="olap-tag">⬡ Roll-Up — month → year</span>
-    <span class="olap-tag">⬡ Drill-Down — year → month</span>
-    <span class="olap-tag">⬡ Pivot — month × year heatmap</span>
+    <span class="olap-tag">⬡ Roll-Up — mese → anno</span>
+    <span class="olap-tag">⬡ Drill-Down — anno → mese</span>
+    <span class="olap-tag">⬡ Pivot — heatmap mese × anno</span>
   </div>
 
   <div class="cards">
     <div class="card">
       <div class="card-icon">📈</div>
-      <h4>Strong YoY Growth</h4>
-      <p>Order volumes grew <strong style="color:#fff">consistently year over year</strong> from 2016 through mid-2018.</p>
+      <h4>Crescita YoY Forte</h4>
+      <p>Crescita costante anno su anno dal 2016 al 2018. Il 2018 è il più forte con oltre <strong style="color:#fff">54.000 ordini</strong> nei soli primi 8 mesi.</p>
     </div>
     <div class="card">
       <div class="card-icon">🗓️</div>
-      <h4>Seasonal Peaks</h4>
-      <p><strong style="color:#fff">November and January</strong> show recurring spikes — Black Friday and post-holiday shopping.</p>
+      <h4>Picchi Stagionali</h4>
+      <p><strong style="color:#fff">Novembre</strong> (Black Friday) e <strong style="color:#fff">Gennaio</strong> (shopping post-festività) mostrano picchi ricorrenti visibili in entrambi gli anni completi.</p>
     </div>
     <div class="card">
       <div class="card-icon">🔥</div>
-      <h4>2018 Best Year</h4>
-      <p>2018 was the strongest year with over <strong style="color:#fff">54,000 orders</strong> in just the first 8 months.</p>
+      <h4>Heatmap = Pivot OLAP</h4>
+      <p>La heatmap mese × anno è la dimostrazione visiva del <strong style="color:#fff">Pivot</strong>: stesso cubo di dati, assi ruotati per una prospettiva diversa — mese sull'asse Y, anno sull'asse X.</p>
     </div>
   </div>
 </div>
 
-<!-- ════════════════ FOOTER ════════════════ -->
+<div class="sep"></div>
+
+<!-- ══════════════ KEY FINDINGS ══════════════ -->
+<div class="section-wrap c-findings" id="findings">
+  <div class="section-tag"><div class="tag-line" style="background:#e07b39"></div>Risultati Chiave</div>
+  <h2>Insight dal Data Warehouse</h2>
+  <p class="desc">I principali pattern emersi dall'analisi delle 112.650 transazioni.</p>
+
+  <div class="findings-grid">
+    <div class="finding">
+      <div class="finding-num" style="color:#2d7dd2">12</div>
+      <div class="finding-label">giorni — Lead Time Mediano</div>
+      <p>Tempo mediano dall'acquisto alla consegna. Le consegne arrivano in media 12 giorni <em>prima</em> della data stimata dal sistema.</p>
+    </div>
+    <div class="finding">
+      <div class="finding-num" style="color:#3a9b6f">40%+</div>
+      <div class="finding-label">ordini da São Paulo</div>
+      <p>SP da sola supera il 40% di tutti gli ordini. I primi 5 stati del Sudest concentrano il 70% del fatturato totale.</p>
+    </div>
+    <div class="finding">
+      <div class="finding-num" style="color:#e07b39">73.9%</div>
+      <div class="finding-label">pagamenti con carta di credito</div>
+      <p>La carta di credito è il metodo largamente dominante. Il boleto (19%) riflette le specificità del mercato brasiliano.</p>
+    </div>
+    <div class="finding">
+      <div class="finding-num" style="color:#8b5cf6">814</div>
+      <div class="finding-label">record recuperati in Reviews</div>
+      <p>Identificando la chiave corretta (review_id, order_id) anziché il solo review_id, 814 record legittimi sono stati salvati da una deduplicazione errata.</p>
+    </div>
+    <div class="finding">
+      <div class="finding-num" style="color:#e05a4e">98%</div>
+      <div class="finding-label">riduzione Geolocation</div>
+      <p>Da 1.000.163 a 19.015 record dopo aggregazione per ZIP, eliminando duplicati e coordinate fuori dal Brasile.</p>
+    </div>
+    <div class="finding">
+      <div class="finding-num" style="color:#3a9b6f">4.5/5</div>
+      <div class="finding-label">review score medio</div>
+      <p>La soddisfazione media è alta. La distribuzione è fortemente sbilanciata: il 5 è il valore più frequente con oltre 56.000 ordini.</p>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card" style="border-color: rgba(224,123,57,.2);">
+      <div class="card-icon">⚠️</div>
+      <h4 style="color:#e07b39">Limitazione: payment_value</h4>
+      <p><code style="color:#a78bfa">payment_value</code> è replicato su ogni item dello stesso ordine in fact_sales. Un SUM diretto sovrastima del ~25%: 19.23M BRL vs 15.38M reali. Va aggregato per order_id prima di sommare.</p>
+    </div>
+    <div class="card" style="border-color: rgba(139,92,246,.2);">
+      <div class="card-icon">🤖</div>
+      <h4 style="color:#8b5cf6">Valore del LLM</h4>
+      <p>Il modello llama3.2:3b ha aggiunto valore dove la scorecard era cieca: ha suggerito la chiave composta su Reviews, orientato il filtraggio su Geolocation e classificato correttamente i null semantici di Orders.</p>
+    </div>
+    <div class="card" style="border-color: rgba(45,125,210,.2);">
+      <div class="card-icon">🔮</div>
+      <h4 style="color:#2d7dd2">Estensioni Future</h4>
+      <p>Bridge table per pagamenti multipli; implementazione macro_category per Prodotti; livello region per Clienti; aggiornamento incrementale del DWH con nuovi ordini post-2018.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ FOOTER ══════════════ -->
 <footer>
   <strong>Emanuele Colecchia</strong> &nbsp;·&nbsp; Matricola 276527<br>
   Data Warehouse and Visualization &nbsp;·&nbsp; Università della Calabria &nbsp;·&nbsp; A.A. 2025/2026<br>
-  <span style="color:#2a3a4a; margin-top:8px; display:block">Dataset: Brazilian E-Commerce Public Dataset by Olist · Kaggle</span>
+  <span style="color:#2a3a4a; margin-top:8px; display:block">Dataset: Brazilian E-Commerce Public Dataset by Olist · Kaggle · CC BY-NC-SA 4.0</span>
 </footer>
 
 <script>
 /* ── Counter animation ── */
 function animateCounter(el) {
   const target = parseInt(el.dataset.target);
-  const duration = 1600;
+  const duration = 1800;
   const start = performance.now();
   function step(now) {
     const p = Math.min((now - start) / duration, 1);
     const ease = 1 - Math.pow(1 - p, 3);
     const val = Math.round(ease * target);
     el.textContent = val >= 1000
-      ? (val >= 100000 ? (val/1000).toFixed(0)+'K' : val.toLocaleString('en'))
+      ? (val >= 100000 ? (val/1000).toFixed(0)+'K' : val.toLocaleString('it'))
       : val;
     if (p < 1) requestAnimationFrame(step);
     else el.textContent = target >= 1000
-      ? (target >= 100000 ? (target/1000).toFixed(0)+'K' : target.toLocaleString('en'))
+      ? (target >= 100000 ? (target/1000).toFixed(0)+'K' : target.toLocaleString('it'))
       : target;
   }
   requestAnimationFrame(step);
 }
-
 const counters = document.querySelectorAll('[data-target]');
 const obs = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) { animateCounter(e.target); obs.unobserve(e.target); } });
@@ -705,22 +890,17 @@ const obs = new IntersectionObserver(entries => {
 counters.forEach(c => obs.observe(c));
 
 /* ── Active nav ── */
-const sections = document.querySelectorAll('.section-wrap[id]');
+const sections = document.querySelectorAll('[id]');
 const navLinks = document.querySelectorAll('.nav-links a');
 window.addEventListener('scroll', () => {
   let cur = '';
-  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) cur = s.id; });
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) cur = s.id; });
   navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
 }, { passive: true });
 
 /* ── Lightbox ── */
-function openLb(src) {
-  document.getElementById('lb-img').src = src;
-  document.getElementById('lb').classList.add('open');
-}
-function closeLb() {
-  document.getElementById('lb').classList.remove('open');
-}
+function openLb(src) { document.getElementById('lb-img').src = src; document.getElementById('lb').classList.add('open'); }
+function closeLb()   { document.getElementById('lb').classList.remove('open'); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
 </script>
 </body>
