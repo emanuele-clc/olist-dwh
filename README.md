@@ -1,6 +1,6 @@
 # Progetto Data Warehouse — Olist Brazilian E-Commerce
 
-**Corso:** Laboratorio di Basi di Dati  
+**Corso:** Data Warehouse & Visualization 
 **Studente:** Emanuele Colecchia  
 **Anno Accademico:** 2025/2026
 
