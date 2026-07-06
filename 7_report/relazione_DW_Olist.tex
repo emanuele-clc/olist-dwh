@@ -3,7 +3,7 @@
 % ── Encoding & lingua ────────────────────────────────────────────────────────
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[english]{babel}
+\usepackage[italian]{babel}
 
 % ── Layout ───────────────────────────────────────────────────────────────────
 \usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
@@ -39,6 +39,22 @@
   frame=single,
   xleftmargin=6pt,
   xrightmargin=6pt
+}
+
+% ── Box di evidenza per gli interventi basati su LLM/IA ────────────────────────
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\newtcolorbox{aibox}[1]{
+  breakable,
+  colback=violet!5,
+  colframe=violet!60!black,
+  boxrule=0.8pt,
+  arc=2pt,
+  left=8pt, right=8pt, top=4pt, bottom=4pt,
+  title={IA -- #1},
+  fonttitle=\bfseries\color{white},
+  coltitle=white,
+  colbacktitle=violet!60!black
 }
 
 % ── Spaziatura paragrafi ────────────────────────────────────────────────────
@@ -172,7 +188,9 @@ Rispetto alla struttura originale, ho introdotto tre modifiche principali:
 
 \subsection{Schema Entità-Relazione}
 
-Lo schema E/R è illustrato nella Figura~\ref{fig:er}.
+Lo schema E/R del reconciled database è illustrato nella Figura~\ref{fig:er}. Il modello comprende otto entità: \texttt{Orders}, \texttt{Order\_Items}, \texttt{Customers}, \texttt{Sellers}, \texttt{Products}, \texttt{Payments}, \texttt{Reviews} e \texttt{Geolocation}.
+
+L'entità centrale è \texttt{Order\_Items}, che rappresenta la singola riga d'ordine e si trova all'intersezione delle relazioni principali: ogni riga appartiene a un \texttt{Orders} (relazione \textit{CONTAINS}, 1:n), fa riferimento a un \texttt{Products} (relazione \textit{INCLUDES}, 1:n) e a un \texttt{Sellers} (relazione \textit{SELLS}, 1:n). A sua volta, \texttt{Orders} è collegato a \texttt{Customers} tramite la relazione \textit{PLACES} (1:n), a \texttt{Payments} tramite \textit{PAID VIA} (1:n) e a \texttt{Reviews} tramite \textit{RATED IN} (1:n). Infine, \texttt{Geolocation} è collegata sia a \texttt{Customers} sia a \texttt{Sellers} tramite la relazione \textit{LOCATES} (1:n su \texttt{zip\_code\_prefix}): si tratta di una FK parziale, poiché 278 record cliente (157 CAP distinti) e 7 venditori hanno un CAP assente nella tabella di geolocalizzazione.
 
 \begin{figure}[H]
   \centering
@@ -192,7 +210,7 @@ esterna):
         \textit{\texttt{customer\_unique\_id} identifica il cliente reale: uno stesso
         cliente può avere più \texttt{customer\_id} su ordini distinti.
         \texttt{zip\_code\_prefix} è FK parziale/opzionale verso \texttt{Geolocation}
-        (278 CAP clienti assenti dalla tabella di geolocalizzazione; join eseguito come LEFT JOIN).}
+        (278 record cliente, pari a 157 CAP distinti, senza corrispondenza nella tabella di geolocalizzazione; join eseguito come LEFT JOIN).}
 
   \item \textbf{Sellers}(\underline{seller\_id}, zip\_code\_prefix*, city, state)\\
         \textit{\texttt{zip\_code\_prefix} è FK parziale/opzionale verso \texttt{Geolocation}
@@ -254,11 +272,13 @@ Secondo la tassonomia adottata nel corso, i problemi di qualità dei dati si
 distinguono in:
 
 \begin{itemize}
+\sloppy
   \item \textbf{Missing values}: valori assenti che devono essere presenti per garantire
         la completezza del dato. Da distinguere dai \textit{null semantici}, che sono
         assenze legittime (es.\ data di consegna per ordini non ancora consegnati).
   \item \textbf{Wrong values}: valori presenti ma scorretti rispetto al dominio atteso
-        (es.\ codici di stato in minuscolo, coordinate fuori range geografico).
+        (es.\ \texttt{customer\_zip\_code\_prefix} troncato a 4 cifre per perdita
+        dello zero iniziale, coordinate fuori range geografico).
   \item \textbf{Noisy data}: valori plausibili ma anomali rispetto alla distribuzione
         statistica, non rilevabili da regole di dominio semplici. Richiedono analisi
         della distribuzione (es.\ varianza/deviazione standard, media~$\pm 3\sigma$).
@@ -298,6 +318,7 @@ oggettiva e riproducibile della qualità, ma non è sufficiente da sola: i
 (es.\ \texttt{price > 0}), e richiedono un'ispezione aggiuntiva delle distribuzioni
 statistiche.
 
+\begin{aibox}{Data Quality Assessment (L1) -- \texttt{10\_script\_llm}}
 A supporto dell'interpretazione dei risultati della scorecard è stato utilizzato
 un Large Language Model (\texttt{llama3.2:3b} via Ollama, locale) come strumento
 di analisi narrativa. Per ogni tabella, dopo aver calcolato il profilo statistico
@@ -309,6 +330,7 @@ problemi rilevati, con una spiegazione del perché ciascun problema impatta il
 Data Warehouse e un suggerimento operativo. Questo ha supportato le decisioni
 di intervento descritte nei paragrafi seguenti, nei casi in cui la scorecard da
 sola non era sufficiente a spiegare la natura del problema.
+\end{aibox}
 
 La Tabella~\ref{tab:raw} riepiloga le dimensioni delle tabelle sorgente prima di
 qualsiasi intervento.
@@ -323,11 +345,11 @@ qualsiasi intervento.
     \midrule
     Customers    &   99.441 &       0 &       0 \\
     Sellers      &    3.095 &       0 &       0 \\
-    Products     &   32.951 &   4.456 &       0 \\
+    Products     &   32.951 &   2.448 &       0 \\
     Orders       &   99.441 &   4.908 &       0 \\
     Order Items  &  112.650 &       0 &       0 \\
     Payments     &  103.886 &       0 &       0 \\
-    Reviews      &   99.224 & 145.903 &     814 \\
+    Reviews      &   99.224 & 145.903 &       0 \\
     Geolocation  & 1.000.163 &      0 & 261.831 \\
     \bottomrule
   \end{tabular}
@@ -345,10 +367,13 @@ qualsiasi intervento.
 \end{figure}
 
 Completeness, Uniqueness e Consistency sono al 100\%. Lo scorecard rileva un
-problema di \textbf{Validity} (75,87\%): la regola di dominio impone che
-\texttt{customer\_state} appartenga all'insieme dei codici ISO degli stati brasiliani
-in maiuscolo (\texttt{BR\_STATES}); alcuni record presentano lo stato in minuscolo,
-violando il vincolo di dominio (\textit{wrong values}).
+problema di \textbf{Validity} (75,87\%), interamente attribuibile alla colonna
+\texttt{customer\_zip\_code\_prefix}: la regola di dominio richiede un CAP numerico a
+5 cifre, ma 23.995 record su 99.441 (24,1\%) presentano un CAP a 4 cifre, perché il
+CSV originale memorizza il campo come numero e perde lo zero iniziale dei CAP che
+iniziano per \texttt{0} (\textit{wrong values}). La colonna \texttt{customer\_state}
+risulta invece già conforme alla whitelist \texttt{BR\_STATES} (0 record invalidi):
+nel CSV originale i codici di stato sono già tutti in maiuscolo.
 
 Un'ispezione manuale rivela inoltre un secondo problema, non catturato dallo
 scorecard perché \texttt{customer\_city} non è soggetto a regole di dominio: la
@@ -360,9 +385,14 @@ scorecard.
 \textbf{Intervento -- automatic correction:} \texttt{str.strip()} su tutti i campi
 testo per rimuovere spazi superflui; \texttt{str.title()} su
 \texttt{customer\_city} (Consistency); \texttt{str.upper()} su
-\texttt{customer\_state} (Validity).
+\texttt{customer\_state} applicato in via cautelativa per garantire l'invarianza
+rispetto al maiuscolo/minuscolo (0 modifiche effettive, poiché i valori erano già
+tutti conformi a \texttt{BR\_STATES}).
 
-\textbf{Risultato}: 99.441 record, 0 missing, 0 duplicati; tutti gli indici al 100\%.
+\textbf{Risultato}: 99.441 record, 0 missing, 0 duplicati; Completeness, Uniqueness e
+Consistency al 100\%. Il problema di Validity sul \texttt{customer\_zip\_code\_prefix}
+(CAP a 4 cifre) non viene corretto dalla pipeline: resta documentato come limite noto
+della qualità del dato, senza impatto sulle analisi a livello città/stato.
 
 \subsubsection{Sellers (3.095 record)}
 
@@ -374,15 +404,23 @@ testo per rimuovere spazi superflui; \texttt{str.title()} su
 \end{figure}
 
 Situazione analoga a customers: lo scorecard rileva un problema di \textbf{Validity}
-(66,82\%) sulla colonna \texttt{seller\_state}, dovuto a codici di stato in minuscolo.
-L'ispezione manuale rileva inoltre il problema di Consistency sulle
-\textit{varying value representations} di \texttt{seller\_city}.
+(66,82\%), causato dalla colonna \texttt{seller\_zip\_code\_prefix}: 1.027 record su
+3.095 (33,2\%) presentano un CAP a 4 cifre per lo stesso motivo (perdita dello zero
+iniziale nel CSV originale). La colonna \texttt{seller\_state} è già conforme alla
+whitelist \texttt{BR\_STATES} (0 record invalidi): anche per i sellers i codici di
+stato sono già tutti in maiuscolo nel CSV originale. L'ispezione manuale rileva
+inoltre il problema di Consistency sulle \textit{varying value representations} di
+\texttt{seller\_city}.
 
 \textbf{Intervento -- automatic correction:} \texttt{str.strip()} e
 \texttt{str.title()} su \texttt{seller\_city} (Consistency); \texttt{str.upper()} su
-\texttt{seller\_state} (Validity).
+\texttt{seller\_state} applicato in via cautelativa (0 modifiche effettive, valori
+già conformi a \texttt{BR\_STATES}).
 
-\textbf{Risultato}: 3.095 record, 0 missing, 0 duplicati; tutti gli indici al 100\%.
+\textbf{Risultato}: 3.095 record, 0 missing, 0 duplicati; Completeness, Uniqueness e
+Consistency al 100\%. Come per customers, il problema di Validity sul
+\texttt{seller\_zip\_code\_prefix} (CAP a 4 cifre) resta un limite noto, documentato
+ma non corretto dalla pipeline.
 
 \subsubsection{Geolocation (1.000.163 record originali)}
 
@@ -409,7 +447,9 @@ $lng \in [-73.99; -34.79]$), classificabili come \textit{wrong values}.
         (Validity).
   \item Rimozione dei duplicati esatti con \texttt{drop\_duplicates()} (Uniqueness).
   \item Aggregazione per \texttt{zip\_code\_prefix}: media di lat/lng (centroide),
-        moda di city/state.
+        moda di city/state, mantenendo in \texttt{n\_records} il conteggio dei
+        punti originali aggregati per ciascun prefisso (utile come indicatore
+        di affidabilità del centroide).
 \end{enumerate}
 
 \textbf{Risultato}: 19.015 record, 0 missing, 0 duplicati.
@@ -438,6 +478,7 @@ Da notare che i nomi di colonna \texttt{product\_name\_lenght} e
 \texttt{product\_description\_lenght} (typo nella sorgente: manca la ``h'') sono
 stati mantenuti tali quali per compatibilità con lo schema originale.
 
+\begin{aibox}{Missing Values \& Outlier Classification (L2) -- \texttt{10\_script\_llm}}
 Per la classificazione dei valori mancanti è stato usato il LLM come supporto.
 Il prompt inviato al modello era: \textit{``Per ogni colonna: classifica
 MCAR/MAR/MNAR con motivazione, impatto sul DW, strategia raccomandata.''},
@@ -451,6 +492,7 @@ indicato il \textit{fill in} con costante globale (\texttt{"unknown"}) come
 strategia raccomandata, in quanto non introduce bias e preserva la riga nel
 dataset. Per le misure fisiche, ha suggerito l'imputazione con la mediana di
 colonna, più robusta della media in presenza di outlier.
+\end{aibox}
 
 \textbf{Interventi:}
 \begin{enumerate}
@@ -482,6 +524,7 @@ colonne (9 originali $+$ colonna EN $+$ 12 flag: 8 flag \texttt{\_imputed} e 4 f
 \texttt{\_outlier}).
 
 \subsubsection{Orders (99.441 record)}
+\label{sec:orders-cleaning}
 
 \begin{figure}[H]
   \centering
@@ -501,7 +544,7 @@ in \texttt{order\_delivered\_carrier\_date}, 2.965 in
 \texttt{order\_delivered\_customer\_date}) sono \textbf{semanticamente corretti}:
 corrispondono a ordini non approvati o non ancora consegnati. Non si tratta di veri
 missing values e non devono essere imputati. Il calo di Consistency (96,98\%) è
-dovuto a 3.005 record che violano almeno una delle dipendenze tra date
+dovuto a 3.003 record che violano almeno una delle dipendenze tra date
 (es.\ \texttt{approved\_at} $<$ \texttt{purchase\_timestamp}) -- problema
 classificabile come \textit{violated attribute dependencies} a livello di record.
 
@@ -568,7 +611,7 @@ dall'analisi della distribuzione ma non da una regola puntuale, classificabile c
   \includegraphics[width=\textwidth]{cleaning_pipeline_results.png}
   \caption{Risultati complessivi della cleaning pipeline: distribuzione \texttt{price}
            prima/dopo, audit log per step, missing values Products, outlier flaggati
-           outlier (metodo IQR) per \texttt{order\_items} e DQ score prima/dopo.}
+           (metodo IQR) per \texttt{order\_items} e DQ score prima/dopo.}
   \label{fig:pipeline}
 \end{figure}
 
@@ -612,7 +655,7 @@ order items.
 \textbf{Risultato}: 103.886 record, 0 missing, 0 duplicati. 6 colonne (5 originali
 $+$ 1 flag \texttt{\_payment\_value\_outlier}).
 
-\subsubsection{Reviews (98.410 record dopo cleaning)}
+\subsubsection{Reviews (99.224 record dopo cleaning)}
 
 \begin{figure}[H]
   \centering
@@ -621,9 +664,21 @@ $+$ 1 flag \texttt{\_payment\_value\_outlier}).
   \label{fig:dq_reviews}
 \end{figure}
 
-Lo scorecard mostra \textbf{Uniqueness} a 98,38\% (814 record duplicati su
-\texttt{review\_id} -- problema di \textit{record duplication}), mentre Validity e
-Completeness sono al 100\%.
+Lo scorecard, calcolato assumendo \texttt{review\_id} come chiave primaria, mostra
+\textbf{Uniqueness} al 98,38\% (1.603 record con \texttt{review\_id} ripetuto, di
+cui 814 eccedenti la prima occorrenza), mentre Validity e Completeness sono al
+100\%.
+
+Un'analisi più approfondita mostra però che questi record non sono duplicati:
+i 1.603 record con \texttt{review\_id} ripetuto corrispondono a 789 valori di
+\texttt{review\_id} ciascuno associato a 2 o più \texttt{order\_id} distinti (lo
+stesso punteggio/commento del cliente viene replicato su più ordini, ad es. ordini
+multipli o sostituzioni). Sulla chiave composta (\texttt{review\_id},
+\texttt{order\_id}) non esiste invece alcun duplicato: tutti i 99.224 record sono
+univoci su questa coppia. La chiave naturale corretta per questa tabella è quindi
+(\texttt{review\_id}, \texttt{order\_id}) e non il solo \texttt{review\_id}; lo
+scorecard, basato su una chiave a singolo attributo, sovrastima la duplicazione
+reale.
 
 È importante notare che il check di Completeness è stato applicato solo agli
 attributi obbligatori (\texttt{review\_id}, \texttt{order\_id}, \texttt{review\_score},
@@ -639,8 +694,12 @@ ma ``dati assenti per scelta dell'utente''.
 
 \textbf{Interventi:}
 \begin{enumerate}
-  \item Rimozione dei 814 record duplicati con \texttt{drop\_duplicates()}
-        (Uniqueness).
+  \item Deduplicazione su chiave composta (\texttt{review\_id}, \texttt{order\_id})
+        con \texttt{drop\_duplicates(}\allowbreak\texttt{subset=['review\_id',}\allowbreak\texttt{'order\_id'])}
+        (Uniqueness): 0 record rimossi, perché la tabella non contiene duplicati su
+        questa chiave. Una deduplicazione sul solo \texttt{review\_id} avrebbe
+        invece rimosso erroneamente 814 record legittimi appartenenti ad ordini
+        diversi.
   \item \texttt{pd.to\_datetime()} su \texttt{review\_creation\_date} e
         \texttt{review\_answer\_timestamp} -- automatic correction (Validity).
   \item I campi \texttt{review\_comment\_title} e \texttt{review\_comment\_message}
@@ -652,7 +711,19 @@ ma ``dati assenti per scelta dell'utente''.
         i valori erano compresi tra 1 e 5, nessuna correzione necessaria.
 \end{enumerate}
 
-\textbf{Risultato}: 98.410 record ($-814$ duplicati), 0 duplicati residui.
+\textbf{Risultato}: 99.224 record (0 duplicati), invariato rispetto al dataset
+sorgente; 0 duplicati residui sulla chiave composta (\texttt{review\_id},
+\texttt{order\_id}).
+
+\textbf{Impatto a valle su \texttt{fact\_sales}}: i 814 record di recensione
+recuperati appartengono a 690 ordini distinti che in precedenza, a causa della
+chiave errata, perdevano una o più valutazioni nella media
+\texttt{AVG(review\_score)} per ordine (cfr.\ Sezione~\ref{sec:join-fact-sales}).
+Dopo la correzione, \texttt{olist\_dw.db} è stato ricostruito propagando
+\texttt{fact\_reviews.csv} aggiornato: 690 righe di \texttt{fact\_sales} hanno
+ora un \texttt{review\_score} diverso, di cui 549 passano da \texttt{NULL} a un
+valore valido (il totale di righe con \texttt{review\_score} non nullo sale da
+111.159 a 111.708 su 112.650).
 
 \subsection{Riepilogo degli interventi di data cleaning}
 
@@ -667,8 +738,8 @@ ma ``dati assenti per scelta dell'utente''.
     \toprule
     \textbf{Dataset} & \textbf{Problema} & \textbf{Indice} & \textbf{Intervento} \\
     \midrule
-    Customers / Sellers & State in minuscolo (wrong values) & Validity &
-      Automatic correction (\texttt{upper()}) \\
+    Customers / Sellers & CAP a 4 cifre, zero iniziale perso (wrong values) & Validity &
+      Limite noto, non corretto (\texttt{state.upper()}: cautelativo, 0 modifiche) \\
     Customers / Sellers & Varying value representations su city & Consistency &
       Automatic correction (\texttt{title()}, \texttt{strip()}) \\
     Geolocation & Coordinate fuori range Brasile & Validity &
@@ -687,8 +758,8 @@ ma ``dati assenti per scelta dell'utente''.
       Rilevamento IQR ($Q_1/Q_3 \pm 1.5 \cdot IQR$); flag \texttt{\_outlier} (valori preservati) \\
     Payments & Noisy data (payment\_value) & -- (analisi distribuzione) &
       Rilevamento IQR ($Q_1/Q_3 \pm 1.5 \cdot IQR$); flag \texttt{\_outlier} (valori preservati) \\
-    Reviews & Record duplication (814) & Uniqueness &
-      \texttt{drop\_duplicates()} \\
+    Reviews & \texttt{review\_id} non univoco (789 valori su $\geq$2 \texttt{order\_id}) & Uniqueness &
+      Dedup. su chiave composta (\texttt{review\_id}, \texttt{order\_id}); 0 rimossi \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -705,14 +776,36 @@ ma ``dati assenti per scelta dell'utente''.
     rec\_sellers      &   3.095 &  4 & Invariato \\
     rec\_products     &  32.951 & 22 & $+$1 EN category, $+$8 flag \texttt{\_imputed}, $+$4 flag \texttt{\_outlier} \\
     rec\_geolocation  &  19.015 &  6 & Aggregata per ZIP \\
-    rec\_orders       &  99.441 & 15 & $+$6 colonne derivate e flag \\
+    rec\_orders       &  99.441 & 15 & $+$7 colonne derivate e flag \\
     rec\_order\_items & 112.650 &  9 & $+$2 flag outlier \\
     rec\_fact\_payments & 103.886 &  6 & $+$1 flag outlier \\
-    rec\_fact\_reviews  &  98.410 &  7 & $-$814 duplicati \\
+    rec\_fact\_reviews  &  99.224 &  7 & Invariato (chiave: review\_id+order\_id) \\
     \bottomrule
   \end{tabular}
 \end{table}
 
+\begin{sloppypar}
+\textit{Nota -- dove sono state calcolate le colonne aggiunte}: tutte le colonne
+derivate, i flag di qualità e le aggregazioni elencati in questa tabella sono
+generati dal notebook \texttt{olist\_dw\_cleaning\_pipeline.ipynb} (cartella
+\texttt{2\_scripts}) e tracciati riga per riga in \texttt{audit\_log.csv}
+(tabella, operazione, righe prima/dopo, numero di modifiche). In particolare,
+le $+$7 colonne aggiunte a \texttt{rec\_orders} (cfr.\ Sezione
+\ref{sec:orders-cleaning} per il dettaglio di ciascun intervento) sono:
+\end{sloppypar}
+
+\begin{itemize}
+\sloppy
+  \item \texttt{\_approved\_missing}, \texttt{\_delivered\_carrier\_missing},
+        \texttt{\_delivered\_customer\_missing} -- flag binari sui null
+        semantici;
+  \item \texttt{delivery\_lead\_days}, \texttt{delivery\_delay\_days} --
+        feature engineering sulle date di consegna;
+  \item \texttt{purchase\_year}, \texttt{purchase\_month} -- estratti dal
+        timestamp di acquisto.
+\end{itemize}
+
+\begin{aibox}{Cleaning Plan \& Audit Narrative (L3) -- \texttt{10\_script\_llm}}
 Prima di eseguire il cleaning, il LLM è stato usato come supporto per pianificare
 gli interventi su ogni tabella. Il prompt inviato era: \textit{``Produci un piano
 di cleaning per la tabella Olist \{nome\}''}, accompagnato dal profilo dei dati
@@ -725,6 +818,7 @@ Al termine del cleaning, per ogni tabella è stato inviato un secondo prompt:
 prima/dopo (null rimossi, duplicati eliminati, righe modificate). Il modello ha
 prodotto una breve narrativa in linguaggio naturale che descrive cosa è stato
 fatto, perché e quale miglioramento misurabile è stato ottenuto.
+\end{aibox}
 
 % ═══════════════════════════════════════════════════════════════════════════
 %  4. PROGETTAZIONE CONCETTUALE – SCHEMA DFM
@@ -761,7 +855,7 @@ data-driven. La Figura~\ref{fig:attrtree} mostra il risultato.
   \label{fig:attrtree}
 \end{figure}
 
-\subsection{Dal Attribute Tree allo Schema DFM}
+\subsection{Dall'Attribute Tree allo Schema DFM}
 
 Partendo dall'attribute tree, ho applicato le regole del metodo data-driven per
 ricavare lo schema DFM. I passaggi principali:
@@ -772,29 +866,55 @@ ricavare lo schema DFM. I passaggi principali:
         \texttt{payment\_type}, \texttt{purchase\_date}) sono state promosse a
         dimensioni.
 
-  \item \textbf{Editing dell'attribute tree}: ho apportato le seguenti modifiche
-        motivate:
+  \item \textbf{Editing dell'attribute tree}: secondo la metodologia DFM, l'editing
+        dell'albero avviene tramite due operazioni. Il \textbf{pruning} di un vertice
+        $v$ consiste nella rimozione dell'intero sottoalbero radicato in $v$: gli
+        attributi eliminati non saranno disponibili nella fact table né utilizzabili
+        per aggregare i dati. Il \textbf{grafting} di un vertice $v$ con padre $v'$ si
+        usa invece quando $v$ esprime un'informazione non interessante ma i suoi
+        discendenti vanno mantenuti: i figli di $v$ vengono collegati direttamente a
+        $v'$ ed $v$ viene eliminato; si perde così il livello di aggregazione di $v$,
+        ma si preservano i livelli sottostanti. Ho applicato queste operazioni come
+        segue:
         \begin{itemize}
-          \item \textit{Eliminazione di \texttt{customer\_unique\_id}}: a livello di
-                singolo order item, \texttt{customer\_id} è già sufficiente.
-                Includerlo sarebbe ridondante.
-          \item \textit{Eliminazione di \texttt{zip\_code\_prefix}}: troppo granulare
-                per le analisi previste; coperto dalla gerarchia geografica
-                $\text{city} \to \text{state}$.
-          \item \textit{Eliminazione degli attributi testo di Reviews}: testo libero
-                non strutturato, senza valore per analisi OLAP quantitative. Mantenuto
-                solo \texttt{review\_score} come misura.
-          \item \textit{Eliminazione dei flag di qualità}: utili nel reconciled
-                database per auditing, ma privi di significato analitico nel DWH.
+        \sloppy
+          \item \textit{Pruning di \texttt{customer\_unique\_id}}: rimozione
+                dell'intero sottoalbero (vertice foglia, senza discendenti). A livello
+                di singolo order item, \texttt{customer\_id} è già sufficiente:
+                includerlo sarebbe ridondante.
+          \item \textit{Grafting di \texttt{zip\_code\_prefix}}: il vertice
+                \texttt{zip\_code\_prefix} viene eliminato e i suoi figli
+                \texttt{city} e \texttt{state} vengono collegati direttamente al
+                padre (\texttt{customer\_id}/\texttt{seller\_id}). Si perde la
+                granularità per singolo CAP, troppo fine per le analisi previste, ma
+                si preserva la gerarchia geografica $\text{city} \to \text{state}$.
+          \item \textit{Pruning degli attributi testo di Reviews}: rimozione
+                dell'intero sottoalbero dei campi testuali liberi, non strutturati e
+                senza valore per analisi OLAP quantitative. Mantenuto solo
+                \texttt{review\_score} come misura.
+          \item \textit{Pruning dei flag di qualità}: rimozione dell'intero sottoalbero
+                dei flag \texttt{\_imputed}/\texttt{\_outlier}/\texttt{\_missing} --
+                utili nel reconciled database per auditing, ma privi di significato
+                analitico nel DWH.
           \item \textit{Aggiunta gerarchia \texttt{category\_en} $\to$
                 \texttt{macro\_category}}: la sorgente espone solo la categoria in
                 portoghese. Ho aggiunto la traduzione in inglese (già disponibile nel
                 reconciled database) e una macro-categoria per abilitare operazioni di
-                roll-up di alto livello.
-          \item \textit{Promozione di \texttt{payment\_type} a dimensione}: un ordine
-                può avere più pagamenti (es.\ voucher $+$ carta). Per evitare
-                duplicazioni nella fact table, ho associato a ogni riga solo il
-                \textbf{metodo principale} (quello con importo maggiore).
+                roll-up di alto livello. Non è un'operazione di pruning/grafting in
+                senso stretto, ma un'estensione dell'albero con un nuovo attributo
+                derivato e una nuova gerarchia.
+          \item \textit{Promozione di \texttt{payment\_type} a dimensione}: secondo le
+                regole DFM le dimensioni si scelgono tra i figli diretti della radice
+                dell'attribute tree. Un ordine può avere più pagamenti (es.\ voucher
+                $+$ carta): per evitare duplicazioni nella fact table, ho associato a
+                ogni riga il \textbf{metodo di pagamento della prima rata registrata
+                per l'ordine} nella tabella dei pagamenti riconciliata
+                (\texttt{rec\_fact\_payments}), mentre \texttt{payment\_value}
+                rappresenta la somma di tutti gli importi pagati per quell'ordine.
+                Si tratta di una scelta deterministica ma non basata sull'importo
+                della singola rata: una possibile estensione futura è normalizzare i
+                pagamenti multipli in una bridge table dedicata, evitando così la
+                scelta di un singolo metodo ``principale''.
           \item \textit{Trattamento di \texttt{total\_item\_value} e
                 \texttt{delivered\_on\_time}}: compaiono nell'attribute tree come misure
                 concettuali. \texttt{total\_item\_value} $=$ \texttt{price} $+$
@@ -820,9 +940,17 @@ ricavare lo schema DFM. I passaggi principali:
 
   \item \textbf{Classificazione delle misure} in base all'additività:
         \begin{itemize}
-          \item \textit{Additive}: \texttt{price}, \texttt{freight\_value},
-                \texttt{payment\_value}, \texttt{payment\_installments} --
-                sommabili lungo tutte le dimensioni;
+        \sloppy
+          \item \textit{Additive}: \texttt{price}, \texttt{freight\_value} --
+                sommabili lungo tutte le dimensioni, incluso il livello item;
+          \item \textit{Additive solo a livello ordine}: \texttt{payment\_value},
+                \texttt{payment\_installments} -- provengono da un aggregato per
+                \texttt{order\_id} (Sezione~\ref{sec:join-fact-sales}) e vengono
+                replicate identiche su tutte le righe item dello stesso ordine in
+                \texttt{fact\_sales}; \textbf{non sono additive a livello item} (una
+                SUM su più item dello stesso ordine duplica il valore). Vanno
+                aggregate per \texttt{order\_id} prima di applicare SUM, oppure usate
+                con AVG a livello item;
           \item \textit{Non additiva}: \texttt{review\_score} -- solo AVG, la somma
                 dei punteggi non ha significato;
           \item \textit{Semi-additive}: \texttt{delivery\_delay\_days},
@@ -836,12 +964,18 @@ ricavare lo schema DFM. I passaggi principali:
 Due scelte progettuali comportano una perdita controllata di informazione:
 
 \begin{itemize}
-  \item \textbf{Pagamenti multipli}: scelto il metodo principale per evitare
-        duplicazioni nella fact table. Si perde il dettaglio dei pagamenti secondari,
-        ma si garantisce la correttezza delle misure additive.
+  \item \textbf{Pagamenti multipli}: i pagamenti vengono aggregati per
+        \texttt{order\_id} (somma di \texttt{payment\_value} e
+        \texttt{payment\_installments}, metodo di pagamento principale) prima del
+        join con gli order-item. Si perde il dettaglio dei pagamenti secondari per
+        metodo. Inoltre, poiché l'aggregato è per ordine ma viene riportato su ogni
+        riga item, \texttt{payment\_value} e \texttt{payment\_installments} sono
+        additivi solo a livello ordine, non a livello item (cfr.\
+        Sezione~\ref{sec:join-fact-sales} e Tabella~\ref{tab:misure}).
   \item \textbf{Geolocalizzazione}: aggregando per ZIP si perde la variabilità
         puntuale delle coordinate. Accettabile perché le analisi previste lavorano a
-        livello città/stato. Da segnalare che 278 ZIP di clienti e 7 di venditori non
+        livello città/stato. Da segnalare che 278 record cliente (157 ZIP distinti) e
+        7 venditori non
         hanno corrispondenza in \texttt{Geolocation}: per questi record, \texttt{lat}
         e \texttt{lng} risultano NULL nel DWH, senza impatto sulle analisi geografiche
         per stato.
@@ -851,8 +985,8 @@ Lo schema DFM risultante è in Figura~\ref{fig:dfm}.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.85\textwidth]{dfm_schema_pieno.png}
-  \caption{Schema DFM del fatto \texttt{Order\_Items}}
+  \includegraphics[width=0.85\textwidth]{dfm_schema_pieno_v2.png}
+  \caption{Schema DFM del fatto \texttt{ORDER\_ITEM}}
   \label{fig:dfm}
 \end{figure}
 
@@ -908,10 +1042,10 @@ Il modello supporta le principali operazioni OLAP:
     \texttt{seller\_id}           & TEXT FK  & Riferimento a \texttt{dim\_seller} \\
     \texttt{payment\_type\_id}    & INT FK   & Riferimento a \texttt{dim\_payment\_type} \\
     \texttt{order\_status}        & TEXT     & Stato dell'ordine (attributo degenere) \\
-    \texttt{payment\_installments} & REAL    & Numero di rate del pagamento -- misura additiva \\
+    \texttt{payment\_installments} & REAL    & Numero di rate del pagamento -- additiva solo a livello ordine (Tab.~\ref{tab:misure}) \\
     \texttt{price}                & REAL     & Prezzo del prodotto -- misura additiva \\
     \texttt{freight\_value}       & REAL     & Costo di spedizione -- misura additiva \\
-    \texttt{payment\_value}       & REAL     & Valore totale del pagamento -- misura additiva \\
+    \texttt{payment\_value}       & REAL     & Valore totale del pagamento -- additiva solo a livello ordine (Tab.~\ref{tab:misure}) \\
     \texttt{delivery\_lead\_days} & REAL     & Giorni dalla vendita alla consegna -- semi-additiva (AVG, MAX, MIN) \\
     \texttt{delivery\_delay\_days} & REAL    & Ritardo rispetto alla data stimata (negativo = anticipo) -- semi-additiva \\
     \texttt{review\_score}        & REAL     & Punteggio recensione 1--5 -- solo AVG (non additiva) \\
@@ -921,7 +1055,11 @@ Il modello supporta le principali operazioni OLAP:
 
 \textit{Nota: \texttt{order\_id} e \texttt{order\_item\_id} sono mantenuti nella fact
 table come attributi degeneri per garantire la tracciabilità verso la sorgente
-operazionale, senza introdurre una dimensione dedicata.}
+operazionale, senza introdurre una dimensione dedicata. Le misure
+\texttt{payment\_value} e \texttt{payment\_installments} provengono da un aggregato
+per ordine e sono replicate su ogni riga item: sono quindi additive solo a livello
+ordine, non a livello item (cfr.\ Tabella~\ref{tab:misure} e
+Sezione~\ref{sec:join-fact-sales}).}
 
 \textbf{Fact table:} \texttt{fact\_sales}
 
@@ -965,9 +1103,11 @@ Collegata alla fact table tramite il metodo di pagamento principale per ogni ord
 metodi di pagamento.}
 
 \subsection{Glossario delle misure}
+\label{sec:misure}
 
 \begin{table}[H]
   \centering
+  \footnotesize
   \caption{Glossario delle misure della fact table \texttt{fact\_sales}}
   \label{tab:misure}
   \begin{tabular}{>{\ttfamily}l
@@ -981,11 +1121,16 @@ metodi di pagamento.}
       cliente, venditore, tempo). \\
     freight\_value       & Additiva -- SUM, AVG &
       Costo di spedizione del singolo item. Sommabile lungo tutte le dimensioni. \\
-    payment\_value       & Additiva -- SUM, AVG &
-      Valore totale del pagamento per l'ordine. Sommabile lungo tutte le dimensioni. \\
-    payment\_installments & Additiva -- SUM, AVG &
-      Numero di rate del pagamento. Sommabile; utile per analisi sull'uso del
-      credito per categoria di prodotto e area geografica. \\
+    payment\_value       & Additiva solo a livello ordine &
+      Valore totale del pagamento per l'ordine. \textbf{Attenzione}: in
+      \texttt{fact\_sales} è replicato su ogni riga item dello stesso ordine
+      (Sezione~\ref{sec:join-fact-sales}); una SUM a livello item sovrastima il
+      totale (nel DWH: 19,23M contro 15,38M nei pagamenti originali). Aggregare
+      per \texttt{order\_id} prima di sommare, oppure usare AVG a livello item. \\
+    payment\_installments & Additiva solo a livello ordine &
+      Numero di rate del pagamento, replicato su ogni item dello stesso ordine per
+      lo stesso motivo di \texttt{payment\_value}. Aggregare per \texttt{order\_id}
+      prima di analisi sull'uso del credito per categoria/area geografica. \\
     delivery\_lead\_days & Semi-additiva -- AVG, MAX, MIN &
       Giorni dalla data di acquisto alla consegna effettiva. Non sommabile nel
       tempo; ha senso aggregare con AVG, MAX, MIN. NULL per ordini non consegnati. \\
@@ -1016,7 +1161,14 @@ Risultano NULL per gli ordini non ancora consegnati (null semantico, non dato ma
 
 Il passaggio dal reconciled database allo star schema segue il processo ETL
 (\textit{Extract, Transform, Load}), eseguito per costruire il database SQLite
-finale \texttt{olist\_dw.db}.
+finale \texttt{olist\_dw.db}. Questa fase è implementata nello script
+\texttt{consegna/2\_scripts/build\_star\_schema.py}, eseguibile a partire dai
+CSV puliti in \texttt{consegna/3\_cleaned\_data/}: lo script ricostruisce sia
+il reconciled layer (\texttt{rec\_*}) sia il data warehouse layer
+(\texttt{dim\_*} e \texttt{fact\_sales}), garantendo la riproducibilità
+dell'intero processo descritto in questa sezione (in particolare le regole
+di aggregazione di \texttt{payment\_type}/\texttt{payment\_value} discusse in
+Sezione~\ref{sec:join-fact-sales}).
 L'architettura prevede due livelli distinti nel database SQLite:
 
 \begin{itemize}
@@ -1052,7 +1204,9 @@ Il processo ETL si articola in tre fasi:
                 con \texttt{rec\_geolocation} su \texttt{zip\_code\_prefix}.
           \item \texttt{fact\_sales} viene popolata tramite JOIN tra
                 \texttt{rec\_order\_items}, \texttt{rec\_orders}, pagamenti aggregati
-                per ordine (somma del \texttt{payment\_value} per tipo) e media delle
+                per ordine (\texttt{payment\_value} e \texttt{payment\_installments}
+                come somma su tutte le rate, \texttt{payment\_type} come prima rata
+                registrata) e media delle
                 recensioni per ordine. Le chiavi naturali \texttt{order\_id} e
                 \texttt{order\_item\_id} sono mantenute come attributi degeneri.
         \end{itemize}
@@ -1064,21 +1218,32 @@ Il processo ETL si articola in tre fasi:
 \end{enumerate}
 
 \subsection{Dettaglio dei JOIN per la costruzione di \texttt{fact\_sales} e delle dimensioni}
+\label{sec:join-fact-sales}
 
 La tabella \texttt{fact\_sales} è costruita a partire da \texttt{rec\_order\_items}
 (una riga per prodotto per ordine) unendo quattro sorgenti del reconciled layer:
 
 \begin{itemize}
+\sloppy
   \item \textbf{JOIN con \texttt{rec\_orders}} su \texttt{order\_id}: porta in
         \texttt{fact\_sales} il \texttt{customer\_id} e il \texttt{date\_id}
         (ricavato convertendo \texttt{order\_purchase\_timestamp} nel formato
         intero YYYYMMDD).
 
   \item \textbf{LEFT JOIN con i pagamenti pre-aggregati}: prima del join, i
-        pagamenti vengono aggregati per \texttt{(order\_id, payment\_type)} con
-        \texttt{SUM(payment\_value)}, eliminando le rate multiple dello stesso
-        metodo. Il LEFT JOIN garantisce che gli order-item senza pagamento
-        registrato non vengano persi.
+        pagamenti vengono aggregati per \texttt{order\_id}: \texttt{payment\_value}
+        e \texttt{payment\_installments} tramite \texttt{SUM} su tutte le rate
+        dell'ordine (indipendentemente dal metodo), mentre \texttt{payment\_type}
+        viene preso dalla prima rata registrata per l'ordine (\texttt{first()}).
+        Il LEFT JOIN garantisce che gli order-item senza pagamento registrato non
+        vengano persi.
+        \textbf{Effetto collaterale}: per gli ordini con più order-item, il totale
+        aggregato per ordine viene replicato su ciascuna riga item di
+        \texttt{fact\_sales}. Di conseguenza \texttt{payment\_value} e
+        \texttt{payment\_installments} risultano \textit{additivi solo a livello
+        ordine} e non a livello item (cfr.\ Tabella~\ref{tab:misure}): la SUM di
+        \texttt{payment\_value} sull'intera \texttt{fact\_sales} vale 19,23M contro
+        i 15,38M dei pagamenti originali aggregati per ordine.
 
   \item \textbf{LEFT JOIN con le recensioni pre-aggregate}: le recensioni vengono
         aggregate per \texttt{order\_id} con \texttt{AVG(review\_score)}, in
@@ -1092,8 +1257,8 @@ Le tabelle di dimensione vengono costruite come segue:
   \item \textbf{\texttt{dim\_customer}} e \textbf{\texttt{dim\_seller}} vengono
         arricchite con le coordinate geografiche (\texttt{lat}/\texttt{lng})
         tramite LEFT JOIN con \texttt{rec\_geolocation} su
-        \texttt{zip\_code\_prefix}. Il LEFT JOIN è essenziale: 278 ZIP di clienti
-        e 7 di venditori risultano assenti in \texttt{rec\_geolocation}; un INNER
+        \texttt{zip\_code\_prefix}. Il LEFT JOIN è essenziale: 278 record cliente
+        (157 ZIP distinti) e 7 venditori risultano assenti in \texttt{rec\_geolocation}; un INNER
         JOIN eliminerebbe quei record, producendo chiavi orfane in
         \texttt{fact\_sales}.
 
@@ -1133,8 +1298,10 @@ Le tabelle di dimensione vengono costruite come segue:
 \textbf{Integrità referenziale}: verificata con query di controllo sul DB finale.
 La tabella \texttt{fact\_sales} non presenta righe orfane verso
 \texttt{dim\_product}, \texttt{dim\_seller}, \texttt{dim\_customer} e
-\texttt{dim\_date}. Per \texttt{dim\_payment\_type\_id}: 3 valori NULL legittimi, corrispondenti a ordini annullati
-prima della registrazione del pagamento; non costituiscono FK orfane ma
-riflettono uno stato operativo reale del dataset.
+\texttt{dim\_date}. Per \texttt{payment\_type\_id}: 3 valori NULL legittimi,
+corrispondenti alle 3 righe item di un unico ordine (consegnato) per il quale la
+sorgente non registra alcun pagamento -- caso noto del dataset Olist; non
+costituiscono FK orfane ma riflettono uno stato operativo reale del dataset.
 
 \end{document}
+        

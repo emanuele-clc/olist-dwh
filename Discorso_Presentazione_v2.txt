@@ -1,0 +1,239 @@
+﻿Discorso di Presentazione
+Olist E-Commerce — Data Warehouse & Visualization
+Emanuele Colecchia — A.A. 2025/2026
+[ Presentazione in inglese, con Tableau live sul secondo monitor per le slide 7–10 ]
+
+
+SLIDE 1 — Titolo
+[ ~30 secondi — introduzione personale ]
+
+Cosa dire
+Good morning. My project is an end-to-end Data Warehouse built on the Olist Brazilian e-commerce dataset — around 100,000 real, anonymised orders from 2016 to 2018.
+The goal was to build a decision-support system that answers concrete business questions: which product categories generate the most revenue, where delivery delays concentrate geographically, and how sales evolved over time.
+I’ll walk you through the full pipeline — from raw CSV files to four interactive Tableau dashboards.
+
+
+SLIDE 2 — Dataset & Business Questions
+[ ~1 minuto ]
+
+Cosa dire
+Olist is a Brazilian marketplace connecting small sellers to large e-commerce platforms. The dataset, publicly available on Kaggle, consists of nine relational CSV files: customers, sellers, orders, order items, payments, reviews, products, geolocation, and a category-name translation table.
+The five business questions that drive the entire architecture are:
+•  Which product categories generate the most revenue — and how is it distributed geographically?
+•  How have sales evolved from 2016 to 2018? Are there seasonal peaks?
+•  How does customer satisfaction vary by category, state, and seller?
+•  What percentage of orders are delivered on time, and where are the worst delays?
+•  Which payment method dominates by volume and value?
+
+Se chiedono perché Olist
+Dataset reale, multi-tabella, ricco di sfide di qualità dei dati. Perfetto per dimostrare l’intera pipeline DW end-to-end.
+
+
+SLIDE 3 — Project Pipeline
+[ ~1 minuto ]
+
+Cosa dire
+The pipeline has seven sequential steps.
+•  Step 1: Data Collection — nine raw CSV files from Kaggle.
+•  Step 2: ER Schema — I designed a reconciled relational database consolidating all sources into a normalised, consistent structure.
+•  Step 3: DQA — a programmatic scorecard across five quality indices, augmented by a local LLM.
+•  Step 4: Cleaning — deduplication, normalisation, imputation, outlier flagging.
+•  Step 5: DFM and Star Schema design — dimensional fact model, then translation to a star schema.
+•  Step 6: ETL — load into SQLite (olist_dw.db). Referential integrity verified with zero orphan rows.
+•  Step 7: Visualisation — four Tableau dashboards demonstrating all five OLAP operations.
+
+Se chiedono perché SQLite e non PostgreSQL
+SQLite è embedded, portabile, zero configurazione server. Per un dataset di questa dimensione (112.650 righe) è più che sufficiente. PostgreSQL sarebbe necessario per ambienti multi-utente o carichi di produzione.
+
+
+SLIDE 4 — Data Quality Analysis
+[ ~2 minuti — sezione tecnica importante ]
+
+Cosa dire
+The DQA phase uses a programmatic scorecard — a Python class called DQAReport — that evaluates five quality indices on declarative rules.
+•  Validity: percentage of values that satisfy domain constraints — types, ranges, whitelists.
+•  Completeness: percentage of non-null values on mandatory attributes.
+•  Uniqueness: percentage of records with a unique primary key.
+•  Consistency: cross-attribute coherence — for example, delivery date cannot precede purchase date.
+•  Precision: percentage of values within mean ±3σ — identifies statistical outliers.
+
+Six problem types were identified across the dataset: missing values, wrong values, noisy data, FK violations, record duplication, and varying value representations.
+
+For null classification, I used the MCAR–MAR–MNAR taxonomy. For example: delivered_customer_date is null for unshipped orders — that’s MAR, explained by order_status. Review comment text is null because customers chose not to write one — that’s a semantic null, not a missing value.
+
+L’LLM locale
+At three progressive levels: L1 produces a human-readable narrative of quality issues per table. L2 classifies each missing value as MCAR, MAR, or MNAR with a justification. L3 generates a prioritised cleaning plan before any intervention. All runs through llama3.2:3b via Ollama — fully offline, zero data transmission.
+
+Se chiedono perché locale
+Privacy: i dati non escono dall’infrastruttura. In un contesto aziendale reale questo è un requisito non negoziabile.
+
+Se chiedono perché IQR e non ±3σ
+IQR è più robusto in presenza di outlier estremi: media e deviazione standard sono esse stesse influenzate dagli stessi valori anomali che si cerca di individuare. Con distribuzioni asimmetriche come price o weight_g, IQR identifica meglio i valori fuori range.
+
+
+SLIDE 5 — Design Decisions
+[ ~1.5 minuti — slide molto tecnica, aspettarsi domande ]
+
+Cosa dire
+Six key choices shaped the dimensional model.
+
+01 — Granularità: Order Item, non Order
+The fact table records each individual order item — the finest available granularity. A single order can contain products from different categories and sellers: using Order as the fact would collapse all that detail. With Order Item I can always aggregate up, but I can’t disaggregate down.
+
+02 — Pruning: customer_unique_id
+Removed from the attribute tree. At the order-item level, customer_id is already sufficient to identify the customer. customer_unique_id — which maps multiple customer_ids to the same physical person — is redundant at this granularity and adds no analytical value.
+
+03 — Grafting: zip_code_prefix
+The zip_code_prefix node was removed from the hierarchy, but its children — city and state — were reconnected directly to customer_id. We lose ZIP-level analysis, which is too fine for the planned queries, but we keep the meaningful geographic hierarchy city → state.
+
+04 — Measure Additivity
+price and freight_value are fully additive — summable across all dimensions. delivery_lead_days is semi-additive — AVG and MAX make sense, SUM does not. review_score is non-additive — only AVG is semantically valid. payment_value is additive only at order level.
+
+05 — Payment Value: Double-Counting
+payment_value is pre-aggregated per order (SUM of all payment methods) and then replicated on every item row. If you SUM across the entire fact table you get R$19.23M instead of the correct R$15.38M. Always aggregate by order_id first, or use SUM(price) for revenue — that’s always additive.
+
+06 — LLM Locale
+Chose llama3.2:3b via Ollama over cloud APIs for data privacy and reproducibility. Zero cost, zero data transmission, results are deterministic.
+
+Se chiedono perché Star e non Snowflake
+Star Schema denormalizza le gerarchie nelle dimensioni: meno JOIN, aggregazioni più veloci per le query OLAP di Tableau. I dati del DW sono storici e immutabili, quindi la ridondanza non è un problema operativo.
+
+
+SLIDE 6 — Star Schema
+[ ~1 minuto — mostrare il diagramma, poi ETL ]
+
+Cosa dire
+The star schema has one central fact table — fact_sales, 112,650 rows — and five dimension tables.
+•  dim_date: 634 rows, generated synthetically from purchase timestamps. date_id = YYYYMMDD integer — sortable, readable, efficient for joins.
+•  dim_product: 32,951 rows. Includes category_name_english, added via join with the translation table during cleaning.
+•  dim_customer: 99,441 rows. Enriched with lat/lng from the geolocation centroid via LEFT JOIN on zip_code_prefix.
+•  dim_seller: 3,095 rows. Same geographic enrichment.
+•  dim_payment_type: 5 rows — the only dimension with a surrogate key, because payment_type values are plain text strings with no natural numeric key.
+
+fact_sales contains two degenerate attributes — order_id and order_item_id — for traceability to the source, without a dedicated dimension.
+Referential integrity was verified with explicit control queries post-load: zero orphan rows toward any dimension. Three NULL values in payment_type_id correspond to cancelled orders with no registered payment — not FK violations, but legitimate operational state.
+
+Se chiedono surrogate key
+Ho usato surrogate key per fact_sales (INT PK: sale_id) e per dim_payment_type (payment_type_id intero). Per le altre dimensioni ho mantenuto le chiavi naturali per tracciabilità diretta con la sorgente.
+
+
+SLIDE 7 — Dashboard 1: Delivery Performance
+[ Aprire Tableau sul secondo monitor — mostrare live ]
+
+Cosa dire
+Let’s move to Tableau. First dashboard: Delivery Performance.
+71% of orders arrive within 14 days — 70,096 on time versus 28,570 slow. The median lead time is 12 days.
+The geographic gap is striking: Roraima averages 27.8 days, Amapá 25.9, while São Paulo is around 9. That’s a 3× difference driven by logistics infrastructure, not seller performance.
+
+OLAP — da mostrare live
+•  Slice: use the Year filter top-right — switch from All to 2017 to isolate that year across all charts.
+•  Drill-Down: from the national Delivery Distribution view, go to the Delivery by State bar chart to see the per-state breakdown.
+
+Se chiedono perché lead_days e non delay_days
+Il ritardo medio è negativo: gli ordini Olist arrivano in media 12 giorni prima della data stimata. Un grafico con valori negativi dove ‘meglio’ significa ‘più negativo’ è controintuitivo. delivery_lead_days è sempre positivo e misura direttamente la velocità del servizio.
+
+
+SLIDE 8 — Dashboard 2: Geographic Analysis
+[ Tableau live — treemap e mappa riempita ]
+
+Cosa dire
+Second dashboard: Geographic Analysis.
+São Paulo alone accounts for 41.9% of all orders. Add Rio de Janeiro and Minas Gerais and you reach 66% of total volume — from three of Brazil’s 27 states.
+The filled map makes this concentration immediately visible — the dark Southeast versus the pale North.
+
+OLAP — da mostrare live
+•  Slice: click any state in the treemap or on the map — all other views filter automatically via Dashboard Action.
+•  Roll-Up: the treemap shows all states already aggregated — click SP to slice down, then show the Revenue by State bar filtered to SP.
+
+Fix tecnico della mappa
+Tableau non geocodifica le abbreviazioni degli stati brasiliani (SP, RJ…) automaticamente. Ho creato un campo calcolato CASE WHEN che traduce ogni codice nel nome per esteso, impostando Country = Brazil.
+
+
+SLIDE 9 — Dashboard 3: Sales & Payment Analysis
+[ Tableau live — bar categorie + bubble chart ]
+
+Cosa dire
+Third dashboard: Sales and Payment Analysis.
+Total revenue from SUM(price) is R$13 million across 98,666 orders. The top category is health_beauty, followed by watches_gifts and bed_bath_table. Credit card dominates payments — 73.9% of transactions.
+Customer satisfaction: median review score is 4 out of 5. The distribution is strongly right-skewed — 56,885 five-star reviews versus only 10,786 one-star. Most customers are satisfied, but one-star reviews correlate with late deliveries.
+
+OLAP — da mostrare live
+•  Slice: click health_beauty in the category bar — the bubble chart and review distribution filter to that category.
+•  Dice: combine the category filter with a click on the credit_card bubble — two dimensions filtered simultaneously.
+
+Se chiedono perché mediana e non media per il review score
+La distribuzione è fortemente asimmetrica a destra. In questo caso la mediana è più rappresentativa: la media viene spostata dai 10.786 voti di una stella, la mediana no.
+
+Se chiedono del double-counting su payment_value
+payment_value è replicato su ogni riga item dello stesso ordine. SUM sull’intera fact_sales dà R$19.23M invece di R$15.38M. Per questo uso SUM(price) per il revenue nelle dashboard — price è sempre additivo senza ambiguità.
+
+
+SLIDE 10 — Dashboard 4: Time Trends & Seasonality
+[ Tableau live — line chart + bar + heatmap ]
+
+Cosa dire
+Fourth and final dashboard: Time Trends.
+Orders grew 191% from 2016 to 2017 — from roughly 2,000 to 45,000. 2018 reached 51,000, but the dataset ends in August 2018, so the drop in the last months is an artefact of data coverage, not a real decline.
+The November 2017 peak — 7,451 orders — is Brazil’s Black Friday. Clearly visible in both the line chart and the heatmap.
+
+OLAP — da mostrare live
+•  Roll-Up: the Orders by Year bar chart — same data aggregated from monthly to yearly.
+•  Drill-Down: from the yearly bar, move to the Monthly Orders line chart — each line is one year at monthly granularity.
+•  Pivot: the heatmap IS the pivot operation — same cube as the line chart, but Month on rows and Year on columns. Axes rotated, same data.
+
+Se chiedono cosa è il Pivot
+Il Pivot ruota gli assi del cubo: nel line chart l’asse X è il mese, le linee sono gli anni. Nella heatmap i mesi sono sulle righe, gli anni sulle colonne. È lo stesso cubo OLAP visto da una prospettiva diversa.
+
+
+SLIDE 11 — Key Findings
+[ ~1 minuto — sintesi dei 6 risultati ]
+
+Cosa dire
+Six main findings emerged from the full pipeline.
+•  Delivery: 71% on time, 12-day median. Northern states take 3× longer than São Paulo — a structural logistical gap.
+•  Revenue: R$13 million from 98,666 orders. health_beauty is the dominant category, credit card the dominant payment method.
+•  Geography: the São Paulo–Rio–Minas triangle accounts for two-thirds of all volume.
+•  Growth: +191% in one year, with a Black Friday spike of 7,451 items in November 2017.
+•  Satisfaction: median 4/5. Right-skewed distribution — most customers are satisfied, but one-star reviews cluster around late deliveries.
+•  Data quality: the DQA phase caught the payment double-counting (+25%), the miskeyed review records (814 records with a composite key issue), and 261,831 duplicate geolocation rows — all of which would have silently corrupted downstream analysis.
+
+
+SLIDE 12 — Conclusions
+[ ~45 secondi — chiusura ]
+
+Cosa dire
+Three takeaways.
+First: data quality is a prerequisite, not an afterthought. Without the DQA phase, every downstream analysis would have been quietly wrong.
+Second: geography explains everything in this dataset. The SP–RJ–MG triangle dominates volume, revenue, and seller density. Northern Brazil faces delivery times three times longer — a structural gap that no dashboard optimisation can fix.
+Third: the growth is real — and the platform over-promises delivery windows. The 12-day buffer versus estimated dates is a risk, not a feature.
+
+Two planned extensions: a macro-category mapping table for products (the source has no lookup), and a bridge table for orders with multiple payment methods to eliminate the current replication artefact.
+
+Thank you. I’m happy to take questions.
+
+
+APPENDICE — Risposte Rapide alle Domande Più Probabili
+
+Perché Star Schema e non Snowflake?
+Meno JOIN, aggregazioni più veloci. Le gerarchie sono denormalizzate nelle dimensioni. Dati storici immutabili: la ridondanza non è un problema. Per query OLAP in Tableau, Star è la scelta standard.
+
+Perché Order Item e non Order come fatto?
+L’Order Item è la granularità più fine. Un ordine può contenere prodotti di categorie diverse e venditori diversi. Con Order Item posso sempre aggregare verso l’ordine, ma non potrei scendere.
+
+Perché non hai implementato macro_category e region?
+La sorgente non include il mapping categoria→macro-categoria né stato→regione. Implementarle richiederebbe classificare soggettivamente ~70 categorie e mappare manualmente 27 stati. Estensioni pianificate.
+
+La bridge table: perché non l’hai fatta?
+Avrebbe richiesto un secondo fatto nel DW, complicando le query Tableau. Ho adottato la pre-aggregazione per ordine: documentato come limitazione nota. Soluzione corretta per una versione futura.
+
+Perché non hai corretto il CAP a 4 cifre?
+Richiederebbe consultare il database CEP ufficiale dei Correios brasiliani. Non disponibile nella sorgente. Nessun impatto sulle analisi a livello città/stato. Documentato come limite noto.
+
+Come mai review_id non è PK?
+789 valori di review_id sono associati a 2+ order_id distinti. La PK corretta è (review_id, order_id). Deduplicare solo su review_id avrebbe rimosso erroneamente 814 record legittimi.
+
+SUM(payment_value) dà 19.23M o 15.38M?
+19.23M — sbagliato. payment_value è replicato su ogni item dello stesso ordine. Il valore corretto (15.38M) si ottiene aggregando per order_id prima di sommare. Per il revenue uso SUM(price) che non ha questo problema.
+
+Cosa faresti diversamente?
+Bridge table per i pagamenti multipli, lookup table per macro_category e region, dataset più recente (post-2020). Stessa architettura, più completa.
