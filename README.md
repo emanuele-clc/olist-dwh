@@ -50,7 +50,7 @@ Per riprodurre l'intero progetto su una nuova macchina è sufficiente eseguire i
 
 Il notebook esegue automaticamente la pulizia dei dati, la costruzione del database SQLite e l'esportazione dei CSV del Data Warehouse nella cartella `9_exported_from_db/`.
 
-Il file Tableau `8_tableau/Cartella1.twb` è preconfigurato e si collega ai CSV presenti in `9_exported_from_db/`.
+Il file Tableau `8_tableau/olist.twb` è preconfigurato e si collega ai CSV esportati dal Data Warehouse (presenti sia in `8_tableau/` sia in `9_exported_from_db/`).
 
 ---
 

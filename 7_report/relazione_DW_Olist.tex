@@ -190,7 +190,7 @@ Rispetto alla struttura originale, ho introdotto tre modifiche principali:
 
 Lo schema E/R del reconciled database è illustrato nella Figura~\ref{fig:er}. Il modello comprende otto entità: \texttt{Orders}, \texttt{Order\_Items}, \texttt{Customers}, \texttt{Sellers}, \texttt{Products}, \texttt{Payments}, \texttt{Reviews} e \texttt{Geolocation}.
 
-L'entità centrale è \texttt{Order\_Items}, che rappresenta la singola riga d'ordine e si trova all'intersezione delle relazioni principali: ogni riga appartiene a un \texttt{Orders} (relazione \textit{CONTAINS}, 1:n), fa riferimento a un \texttt{Products} (relazione \textit{INCLUDES}, 1:n) e a un \texttt{Sellers} (relazione \textit{SELLS}, 1:n). A sua volta, \texttt{Orders} è collegato a \texttt{Customers} tramite la relazione \textit{PLACES} (1:n), a \texttt{Payments} tramite \textit{PAID VIA} (1:n) e a \texttt{Reviews} tramite \textit{RATED IN} (1:n). Infine, \texttt{Geolocation} è collegata sia a \texttt{Customers} sia a \texttt{Sellers} tramite la relazione \textit{LOCATES} (1:n su \texttt{zip\_code\_prefix}): si tratta di una FK parziale, poiché 278 record cliente (157 CAP distinti) e 7 venditori hanno un CAP assente nella tabella di geolocalizzazione.
+L'entità centrale è \texttt{Order\_Items}, che rappresenta la singola riga d'ordine e si trova all'intersezione delle relazioni principali: ogni riga appartiene a un \texttt{Orders} (relazione \textit{CONTAINS}, 1:n), fa riferimento a un \texttt{Products} (relazione \textit{INCLUDES}, 1:n) e a un \texttt{Sellers} (relazione \textit{SELLS}, 1:n). A sua volta, \texttt{Orders} è collegato a \texttt{Customers} tramite la relazione \textit{PLACES} (1:n), a \texttt{Payments} tramite \textit{PAID VIA} (1:n) e a \texttt{Reviews} tramite \textit{RATED IN} (1:n). Infine, \texttt{Geolocation} è collegata sia a \texttt{Customers} sia a \texttt{Sellers} tramite la relazione \textit{LOCATES} (1:n su \texttt{zip\_code\_prefix}): si tratta di una FK parziale, poiché 279 record cliente (158 CAP distinti) e 7 venditori hanno un CAP assente nella tabella di geolocalizzazione.
 
 \begin{figure}[H]
   \centering
@@ -210,7 +210,7 @@ esterna):
         \textit{\texttt{customer\_unique\_id} identifica il cliente reale: uno stesso
         cliente può avere più \texttt{customer\_id} su ordini distinti.
         \texttt{zip\_code\_prefix} è FK parziale/opzionale verso \texttt{Geolocation}
-        (278 record cliente, pari a 157 CAP distinti, senza corrispondenza nella tabella di geolocalizzazione; join eseguito come LEFT JOIN).}
+        (279 record cliente, pari a 158 CAP distinti, senza corrispondenza nella tabella di geolocalizzazione; join eseguito come LEFT JOIN).}
 
   \item \textbf{Sellers}(\underline{seller\_id}, zip\_code\_prefix*, city, state)\\
         \textit{\texttt{zip\_code\_prefix} è FK parziale/opzionale verso \texttt{Geolocation}
@@ -452,7 +452,7 @@ $lng \in [-73.99; -34.79]$), classificabili come \textit{wrong values}.
         di affidabilità del centroide).
 \end{enumerate}
 
-\textbf{Risultato}: 19.015 record, 0 missing, 0 duplicati.
+\textbf{Risultato}: 19.010 record, 0 missing, 0 duplicati.
 
 \subsubsection{Products (32.951 record)}
 
@@ -775,7 +775,7 @@ valore valido (il totale di righe con \texttt{review\_score} non nullo sale da
     rec\_customers    &  99.441 &  5 & Invariato \\
     rec\_sellers      &   3.095 &  4 & Invariato \\
     rec\_products     &  32.951 & 22 & $+$1 EN category, $+$8 flag \texttt{\_imputed}, $+$4 flag \texttt{\_outlier} \\
-    rec\_geolocation  &  19.015 &  6 & Aggregata per ZIP \\
+    rec\_geolocation  &  19.010 &  6 & Aggregata per ZIP \\
     rec\_orders       &  99.441 & 15 & $+$7 colonne derivate e flag \\
     rec\_order\_items & 112.650 &  9 & $+$2 flag outlier \\
     rec\_fact\_payments & 103.886 &  6 & $+$1 flag outlier \\
@@ -974,7 +974,7 @@ Due scelte progettuali comportano una perdita controllata di informazione:
         Sezione~\ref{sec:join-fact-sales} e Tabella~\ref{tab:misure}).
   \item \textbf{Geolocalizzazione}: aggregando per ZIP si perde la variabilità
         puntuale delle coordinate. Accettabile perché le analisi previste lavorano a
-        livello città/stato. Da segnalare che 278 record cliente (157 ZIP distinti) e
+        livello città/stato. Da segnalare che 279 record cliente (158 ZIP distinti) e
         7 venditori non
         hanno corrispondenza in \texttt{Geolocation}: per questi record, \texttt{lat}
         e \texttt{lng} risultano NULL nel DWH, senza impatto sulle analisi geografiche
@@ -1125,7 +1125,7 @@ metodi di pagamento.}
       Valore totale del pagamento per l'ordine. \textbf{Attenzione}: in
       \texttt{fact\_sales} è replicato su ogni riga item dello stesso ordine
       (Sezione~\ref{sec:join-fact-sales}); una SUM a livello item sovrastima il
-      totale (nel DWH: 19,23M contro 15,38M nei pagamenti originali). Aggregare
+      totale (nel DWH: 20,31M contro 16,01M nei pagamenti originali). Aggregare
       per \texttt{order\_id} prima di sommare, oppure usare AVG a livello item. \\
     payment\_installments & Additiva solo a livello ordine &
       Numero di rate del pagamento, replicato su ogni item dello stesso ordine per
@@ -1242,8 +1242,8 @@ La tabella \texttt{fact\_sales} è costruita a partire da \texttt{rec\_order\_it
         \texttt{fact\_sales}. Di conseguenza \texttt{payment\_value} e
         \texttt{payment\_installments} risultano \textit{additivi solo a livello
         ordine} e non a livello item (cfr.\ Tabella~\ref{tab:misure}): la SUM di
-        \texttt{payment\_value} sull'intera \texttt{fact\_sales} vale 19,23M contro
-        i 15,38M dei pagamenti originali aggregati per ordine.
+        \texttt{payment\_value} sull'intera \texttt{fact\_sales} vale 20,31M contro
+        i 16,01M dei pagamenti originali aggregati per ordine.
 
   \item \textbf{LEFT JOIN con le recensioni pre-aggregate}: le recensioni vengono
         aggregate per \texttt{order\_id} con \texttt{AVG(review\_score)}, in
@@ -1257,8 +1257,8 @@ Le tabelle di dimensione vengono costruite come segue:
   \item \textbf{\texttt{dim\_customer}} e \textbf{\texttt{dim\_seller}} vengono
         arricchite con le coordinate geografiche (\texttt{lat}/\texttt{lng})
         tramite LEFT JOIN con \texttt{rec\_geolocation} su
-        \texttt{zip\_code\_prefix}. Il LEFT JOIN è essenziale: 278 record cliente
-        (157 ZIP distinti) e 7 venditori risultano assenti in \texttt{rec\_geolocation}; un INNER
+        \texttt{zip\_code\_prefix}. Il LEFT JOIN è essenziale: 279 record cliente
+        (158 ZIP distinti) e 7 venditori risultano assenti in \texttt{rec\_geolocation}; un INNER
         JOIN eliminerebbe quei record, producendo chiavi orfane in
         \texttt{fact\_sales}.
 

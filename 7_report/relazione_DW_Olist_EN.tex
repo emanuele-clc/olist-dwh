@@ -187,7 +187,7 @@ Compared to the raw structure, I made three main changes:
 
 Figure~\ref{fig:er} shows the E/R schema of the reconciled database. It has eight entities: \texttt{Orders}, \texttt{Order\_Items}, \texttt{Customers}, \texttt{Sellers}, \texttt{Products}, \texttt{Payments}, \texttt{Reviews}, and \texttt{Geolocation}.
 
-\texttt{Order\_Items} sits at the center, since it is where the main relationships meet: each row belongs to one \texttt{Orders} record (\textit{CONTAINS}, 1:n), points to one \texttt{Products} record (\textit{INCLUDES}, 1:n), and one \texttt{Sellers} record (\textit{SELLS}, 1:n). \texttt{Orders} in turn links to \texttt{Customers} through \textit{PLACES} (1:n), to \texttt{Payments} through \textit{PAID VIA} (1:n), and to \texttt{Reviews} through \textit{RATED IN} (1:n). Finally, \texttt{Geolocation} links to both \texttt{Customers} and \texttt{Sellers} through \textit{LOCATES} (1:n on \texttt{zip\_code\_prefix}) -- this is a partial FK, since 278 customer records (157 distinct ZIP codes) and 7 sellers have a ZIP code with no match in the geolocation table.
+\texttt{Order\_Items} sits at the center, since it is where the main relationships meet: each row belongs to one \texttt{Orders} record (\textit{CONTAINS}, 1:n), points to one \texttt{Products} record (\textit{INCLUDES}, 1:n), and one \texttt{Sellers} record (\textit{SELLS}, 1:n). \texttt{Orders} in turn links to \texttt{Customers} through \textit{PLACES} (1:n), to \texttt{Payments} through \textit{PAID VIA} (1:n), and to \texttt{Reviews} through \textit{RATED IN} (1:n). Finally, \texttt{Geolocation} links to both \texttt{Customers} and \texttt{Sellers} through \textit{LOCATES} (1:n on \texttt{zip\_code\_prefix}) -- this is a partial FK, since 279 customer records (158 distinct ZIP codes) and 7 sellers have a ZIP code with no match in the geolocation table.
 
 \begin{figure}[H]
   \centering
@@ -206,7 +206,7 @@ Below is the relational schema (primary keys underlined; asterisk = foreign key)
         \textit{\texttt{customer\_unique\_id} is the real, unique customer: the same
         person can show up under several different \texttt{customer\_id} values across
         orders. \texttt{zip\_code\_prefix} is a partial/optional FK to
-        \texttt{Geolocation} (278 customer records, corresponding to 157 distinct ZIP
+        \texttt{Geolocation} (279 customer records, corresponding to 158 distinct ZIP
         codes, have no match in that table, so the join is a LEFT JOIN).}
 
   \item \textbf{Sellers}(\underline{seller\_id}, zip\_code\_prefix*, city, state)\\
@@ -440,7 +440,7 @@ Brazil's actual range ($lat \in [-33.75; 5.27]$, $lng \in [-73.99; -34.79]$) --
         reliability signal for the centroid.
 \end{enumerate}
 
-\textbf{Result}: 19,015 records, 0 missing, 0 duplicates.
+\textbf{Result}: 19,010 records, 0 missing, 0 duplicates.
 
 \subsubsection{Products (32,951 records)}
 
@@ -747,7 +747,7 @@ from 111,159 up to 111,708, out of 112,650).
     rec\_customers    &  99,441 &  5 & Unchanged \\
     rec\_sellers      &   3,095 &  4 & Unchanged \\
     rec\_products     &  32,951 & 22 & $+$1 EN category, $+$8 \texttt{\_imputed} flags, $+$4 \texttt{\_outlier} flags \\
-    rec\_geolocation  &  19,015 &  6 & Aggregated by ZIP \\
+    rec\_geolocation  &  19,010 &  6 & Aggregated by ZIP \\
     rec\_orders       &  99,441 & 15 & $+$7 derived columns and flags \\
     rec\_order\_items & 112,650 &  9 & $+$2 outlier flags \\
     rec\_fact\_payments & 103,886 &  6 & $+$1 outlier flag \\
@@ -936,8 +936,8 @@ Two design choices come with some controlled loss of detail:
         Table~\ref{tab:misure}).
   \item \textbf{Geolocation}: aggregating by ZIP loses the point-by-point
         variability of the coordinates, which is acceptable since the planned
-        analyses work at city/state level anyway. It is worth noting that 278
-        customer records (157 distinct ZIP codes) and 7 sellers have no match in
+        analyses work at city/state level anyway. It is worth noting that 279
+        customer records (158 distinct ZIP codes) and 7 sellers have no match in
         \texttt{Geolocation}, so \texttt{lat}/\texttt{lng} are NULL for those rows
         in the warehouse -- no real impact on state-level geographic analysis.
 \end{itemize}
@@ -1084,7 +1084,7 @@ used more than one payment method.}
       Total amount paid for the order. \textbf{Warning}: in \texttt{fact\_sales} it
       is copied onto every item row of the same order
       (Section~\ref{sec:join-fact-sales}), so summing it at item level overstates
-      the total (19.23M in the DW vs.\ 15.38M in the original payments). Aggregate
+      the total (20.31M in the DW vs.\ 16.01M in the original payments). Aggregate
       by \texttt{order\_id} first, or use AVG at item level. \\
     payment\_installments & Additive only at order level &
       Number of installments, copied onto every item of the same order for the same
@@ -1198,7 +1198,7 @@ order) and joins in four sources from the reconciled layer:
         \texttt{fact\_sales}. That is why \texttt{payment\_value} and
         \texttt{payment\_installments} are additive only at the order level and not
         the item level (Table~\ref{tab:misure}): summing \texttt{payment\_value}
-        across all of \texttt{fact\_sales} gives 19.23M, vs.\ 15.38M in the original
+        across all of \texttt{fact\_sales} gives 20.31M, vs.\ 16.01M in the original
         per-order payments.
 
   \item \textbf{LEFT JOIN with pre-aggregated reviews}: reviews are aggregated by
@@ -1212,7 +1212,7 @@ The dimension tables are built like this:
   \item \textbf{\texttt{dim\_customer}} and \textbf{\texttt{dim\_seller}} get their
         geographic coordinates (\texttt{lat}/\texttt{lng}) via a LEFT JOIN with
         \texttt{rec\_geolocation} on \texttt{zip\_code\_prefix}. The LEFT JOIN
-        matters here: 278 customer records (157 distinct ZIP codes) and 7 sellers
+        matters here: 279 customer records (158 distinct ZIP codes) and 7 sellers
         are not in \texttt{rec\_geolocation}, and an INNER JOIN would drop those
         records, leaving orphan keys in \texttt{fact\_sales}.
 
@@ -1231,30 +1231,4 @@ The dimension tables are built like this:
 
 \subsection{Final Data Warehouse Statistics}
 
-\begin{table}[H]
-  \centering
-  \caption{Final volumes of the Star Schema}
-  \label{tab:volumes}
-  \begin{tabular}{lrl}
-    \toprule
-    \textbf{Table} & \textbf{Records} & \textbf{Notes} \\
-    \midrule
-    \texttt{fact\_sales}        & 112,650 & All order rows with valid operational FKs \\
-    \texttt{dim\_customer}      &  99,441 & One record per customer\_id \\
-    \texttt{dim\_product}       &  32,951 & Includes English category \\
-    \texttt{dim\_seller}        &   3,095 & Includes lat/lng from geolocation \\
-    \texttt{dim\_date}          &     634 & 2016--2018 period \\
-    \texttt{dim\_payment\_type} &       5 & credit\_card, boleto, voucher, debit\_card, not\_defined \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-\textbf{Referential integrity}: checked with control queries on the final DB.
-\texttt{fact\_sales} has no orphan rows against \texttt{dim\_product},
-\texttt{dim\_seller}, \texttt{dim\_customer}, or \texttt{dim\_date}. For
-\texttt{payment\_type\_id}: there are 3 legitimate NULLs, corresponding to the 3
-item rows of a single (delivered) order for which the source records no payment at
-all -- a known quirk of the Olist dataset; they are not orphan FKs, just a real
-state the dataset can be in.
-
-\end{document}
+\begin{table}[
